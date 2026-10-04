@@ -1,0 +1,47 @@
+flowchart TB
+
+    CL["Cliente"]
+    CO["Comerciante"]
+    RE["Repartidor"]
+
+    subgraph APP["San Camilo en Línea - Monolito modular"]
+        UI["Interfaz Web / PWA móvil"]
+
+        subgraph MOD["Módulos de negocio"]
+            CAT["Catálogo y Productos"]
+            PED["Carrito y Pedidos"]
+            PAG["Pagos"]
+            DEL["Recojo y Delivery"]
+            NOT["Notificaciones"]
+        end
+
+        INF["Infraestructura: repositorios y adaptadores"]
+
+        UI --> CAT
+        UI --> PED
+        UI --> PAG
+        UI --> DEL
+
+        PED --> CAT
+        PED --> PAG
+        PED --> DEL
+        PED --> NOT
+
+        CAT --> INF
+        PED --> INF
+        PAG --> INF
+        DEL --> INF
+        NOT --> INF
+    end
+
+    DB[(Base de datos relacional)]
+    YAPE["Yape / Proveedor de pago"]
+    WA["Servicio de WhatsApp"]
+
+    CL --> UI
+    CO --> UI
+    RE --> UI
+
+    INF --> DB
+    INF --> YAPE
+    INF --> WA
