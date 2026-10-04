@@ -1,73 +1,84 @@
 # Bitácora de uso de IA — San Camilo en Línea
 
-> Este archivo contiene inicialmente las dos interacciones exigidas durante E2.
-> En E7 deberán completarse como mínimo cinco interacciones en total.
-
 | # | Fecha | Herramienta | Prompt (resumen) | Qué propuso la IA | Qué verificamos o corregimos | Decisión |
-|---|---|---|---|---|---|---|
-| 1 | 03/10/2026 | ChatGPT | Generar 3 alternativas arquitectónicas para San Camilo en Línea considerando plazo, equipo, presupuesto y atributo crítico de usabilidad. | Monolito en capas, monolito modular y microservicios; recomendó monolito modular por equilibrio entre simplicidad y modificabilidad. | Se contrastó la recomendación con R-01, R-03, QA-01 y la matriz ponderada. | Aceptada |
-| 2 | 03/10/2026 | ChatGPT | Actuar como abogado del diablo y criticar el monolito modular seleccionado. | Señaló riesgos de acoplamiento entre módulos, punto único de falla, crecimiento de la base de datos y dependencia de servicios externos. | Se mantuvo la alternativa, pero se consideraron interfaces claras entre módulos y adaptadores para servicios externos. | Corregida |
+|---|-------|-------------|------------------|-------------------|------------------------------|----------|
+| 1 | 03/10/2026 | ChatGPT (GPT-5.6 Sol) | Prompt 1 adaptado (E2): 3 alternativas de estilo arquitectónico para San Camilo en Línea, con plazo de 1 mes, equipo reducido, presupuesto bajo y el atributo crítico de usabilidad. | Monolito en capas, monolito modular y microservicios. Recomendó el monolito modular. | No se aceptó asumir que Yape tiene una API pública abierta, porque eso requería verificación externa. En la arquitectura se usa "Yape / proveedor de pago", sin afirmar una integración específica (ver `diagrams/arquitectura.mmd` y la sección 4 de `matriz-decision.md`). Los microservicios se analizaron y se descartaron por la complejidad de despliegue, monitoreo e infraestructura frente a R-01, R-03 y el equipo reducido. La matriz eligió el monolito modular (4,85 frente a 4,70 y 2,80). | Corregida |
+| 2 | 03/10/2026 | ChatGPT (GPT-5.6 Sol) | Prompt 2 (E2): crítica adversarial ("abogado del diablo") del monolito modular. | 5 riesgos: acoplamiento entre módulos, punto único de falla por tener un solo despliegue, base de datos única como punto de contención, fallas de los servicios externos (WhatsApp, Yape) y necesidad futura de escalar módulos por separado. | Se mantuvo el monolito modular. Ningún riesgo justifica la complejidad de los microservicios para el MVP. Las mitigaciones quedaron en ADR-001 (interfaces entre módulos y adaptadores) y ADR-003 (cola con reintentos para WhatsApp). | Aceptada |
+| 3 | 04/10/2026 | Gemini (modo Thinking) | Redacción y estructura de ADR-001, ADR-002 y ADR-003. | Borradores de redacción y estructura de los tres ADR. | <PENDIENTE: qué se verificó o corrigió en los borradores de los ADR> | <PENDIENTE: decisión> |
+| 4 | 04/10/2026 | Claude Opus 5.5 | Generar `alternativa.puml` (E5): monolito en capas, la alternativa descartada. | Diagrama de componentes en PlantUML del monolito en capas. | La IA no incluyó la nota (`note`) que justifica el descarte según la matriz, y la guía la exige (E5, paso 3). Rodrigo la agregó a mano con el puntaje 4,70 frente a 4,85 y la modificabilidad de 3/5. | Corregida |
+| 5 | 04/10/2026 | Claude Opus 5.5 | Generar `despliegue.py` (E6): vista de despliegue con Python Diagrams. | Script de Python Diagrams con infraestructura en AWS (EC2 y RDS). | (1) La IA asumió AWS. Nuestra restricción es un VPS con Docker, Nginx y Django, así que se reemplazaron las importaciones por `diagrams.onprem` (Nginx, PostgreSQL, Redis, Celery, Prometheus, Grafana). (2) La IA usó una sintaxis desactualizada de la librería `diagrams` que daba `AttributeError` al ejecutarla. Rodrigo corrigió a mano las conexiones de Celery y Redis. | Corregida |
+| 6 | <PENDIENTE: fecha> | Claude (Opus 5.5) | Compilar en archivos `.md` el trabajo del grupo (guía del laboratorio y avance de E1 a E6) como contexto local para Claude Code. | Archivos Markdown locales (no versionados) con la guía y la transcripción del avance de E1 a E6. | Se usaron solo como contexto. La fuente de verdad son los archivos del repositorio. Al compararlos, Claude Code encontró diferencias: el diagrama Mermaid reconstruido en el avance no es igual a `diagrams/arquitectura.mmd`, y el RF-02 del avance está desactualizado frente a `drivers.md`. Por eso se trabajó con los archivos del repositorio. | Aceptada |
+| 7 | 04/10/2026 | Claude Code (Opus 5.5) | Revisar el repositorio y redactar el borrador de la bitácora (E7) y del README (E8) con los datos que reunió el grupo. | Diagnóstico del repositorio (rutas reales de E1 a E6, R-02 sin completar, falta la carpeta `img/`) y borrador de esta bitácora. | Cristhian revisó el borrador antes del commit. Las fechas salen de `git log`. Los datos que no se conocían quedaron marcados como pendientes en lugar de inventarse. | Aceptada |
 
-## Anexo: prompts completos
+> Los prompts completos están en el "Anexo: prompts", al final de este archivo.
+> Nunca se incluyen datos personales ni información confidencial en un prompt.
 
-### Prompt 1 — Generación de alternativas
+## Anexo: prompts
 
+### Interacción 1 — Generación de alternativas (E2)
+
+```text
 Actúa como arquitecto de software senior con experiencia en sistemas web para pequeños comercios.
 
-Contexto: **San Camilo en Línea** es una plataforma para realizar pedidos a los puestos del Mercado San Camilo. Los clientes pueden consultar catálogos por puesto, realizar pedidos con productos de varios puestos, registrar el pago mediante Yape y elegir recojo o delivery. Los comerciantes reciben confirmaciones por WhatsApp.
+Contexto: San Camilo en Línea es una plataforma para realizar pedidos a los puestos del Mercado San Camilo. Los clientes pueden consultar catálogos por puesto, realizar pedidos con productos de diferentes comerciantes, pagar mediante Yape y seleccionar recojo o delivery. Los comerciantes reciben confirmaciones mediante WhatsApp.
 
-Actores: cliente, comerciante y repartidor.
+El atributo crítico es la capacidad de interacción: un comerciante con poca experiencia digital debe poder publicar un producto en máximo tres toques desde un celular de gama baja.
 
-Atributo crítico: capacidad de interacción. Un comerciante con poca experiencia digital debe poder publicar un producto en máximo 3 toques desde un celular de gama baja.
+Restricciones: MVP en producción en un mes, equipo de [número real de integrantes] desarrolladores, presupuesto bajo y uso principalmente desde dispositivos móviles.
 
-Restricciones:
-- MVP en producción en 1 mes.
-- Equipo de **[REEMPLAZAR POR EL NÚMERO REAL DE INTEGRANTES] developers**.
-- Tecnologías dominadas: **[REEMPLAZAR POR LAS TECNOLOGÍAS REALES DEL EQUIPO]**.
-- Presupuesto bajo.
-- Uso principalmente desde dispositivos móviles.
+Propón tres alternativas de estilo arquitectónico. Para cada una indica fortalezas, debilidades, riesgos y los atributos de calidad que favorece o perjudica. Finalmente, recomienda una alternativa justificando la decisión.
+```
 
-Tarea: propón 3 alternativas de estilo arquitectónico. Para cada alternativa indica fortalezas, debilidades, riesgos y qué atributos de calidad favorece o penaliza.
+### Interacción 2 — Crítica adversarial (E2)
 
-Formato: tabla comparativa en Markdown y, al final, una recomendación justificada.
+```text
+Ahora actúa como abogado del diablo y critica la alternativa de monolito modular recomendada para San Camilo en Línea.
 
-No inventes APIs ni capacidades de servicios externos; si no estás seguro, indícalo.
+Considera las restricciones de un MVP de un mes, equipo reducido, presupuesto bajo, celulares de gama baja y dependencia de servicios externos como WhatsApp y el mecanismo de pago con Yape.
 
-### Resumen de la respuesta de IA
+Identifica los cinco principales riesgos de esta arquitectura y propone una posible forma de mitigarlos.
+```
 
-La IA propuso las siguientes alternativas:
+### Interacción 3 — Redacción de ADR-001, ADR-002 y ADR-003
 
-1. **Monolito en capas:** simple, económico y rápido de implementar, pero con riesgo de mayor acoplamiento.
-2. **Monolito modular:** un único despliegue organizado en módulos de dominio, con buen equilibrio entre simplicidad operativa y modificabilidad.
-3. **Microservicios:** mayor independencia y escalabilidad, pero con mayor complejidad de despliegue, monitoreo y comunicación.
+<PENDIENTE: prompt>
 
-La recomendación fue **monolito modular**, debido al plazo corto, presupuesto reducido y necesidad de mantener separados los principales módulos del sistema.
+### Interacción 4 — Generación de `alternativa.puml`
 
----
+<PENDIENTE: prompt>
 
-### Prompt 2 — Crítica adversarial
+### Interacción 5 — Generación de `despliegue.py`
 
-Ahora actúa como **abogado del diablo**.
+<PENDIENTE: prompt>
 
-Critica la alternativa **Monolito Modular** recomendada para San Camilo en Línea.
+### Interacción 6 — Compilación del trabajo del grupo en archivos `.md`
 
-Considera las restricciones de un MVP de 1 mes, equipo reducido, presupuesto bajo, uso desde celulares de gama baja y dependencias externas como WhatsApp y el mecanismo de pago con Yape.
+<PENDIENTE: prompt>
 
-Responde:
-1. ¿Qué supuestos podrían no cumplirse?
-2. ¿Qué podría fallar en producción?
-3. ¿Qué costos ocultos podría tener?
-4. Enumera los 5 riesgos más importantes.
-5. Propón una táctica de mitigación para cada riesgo.
+### Interacción 7 — Borrador de la bitácora (E7) y del README (E8)
 
-### Resumen de la crítica de IA
+Prompt de diagnóstico:
 
-La crítica identificó los siguientes riesgos principales:
+```text
+Lee CLAUDE.md, guia-lab04.md y avance-lab04.md. Mi tarea es hacer E7 (bitacora-ia.md) y E8 (README.md).
 
-1. Los módulos pueden terminar excesivamente acoplados si no se respetan sus interfaces.
-2. Al existir un solo despliegue, una falla grave puede afectar a toda la aplicación.
-3. Una única base de datos puede convertirse en un punto de contención conforme aumente la carga.
-4. Las integraciones con servicios externos pueden fallar o cambiar.
-5. Si el sistema crece significativamente, algunos módulos podrían necesitar escalar de manera independiente.
+Antes de escribir nada:
+1. Revisa el estado real del repositorio (git status, git branch, ls -R docs/) y dime qué archivos de E1 a E6 ya existen y con qué nombres.
+2. Confirma que CLAUDE.md, guia-lab04.md y avance-lab04.md NO aparecen en git status.
+3. Dame la lista de datos que te faltan para completar la bitácora y el README (fechas, herramientas, roles, número de grupo, interacciones 4 y 5, etc.).
 
-El equipo mantuvo el **monolito modular** porque estos riesgos pueden mitigarse y no superan, para el MVP actual, el costo y complejidad de adoptar microservicios.
+No crees ni modifiques archivos todavía. Primero respóndeme con ese diagnóstico y tus preguntas.
+```
+
+Prompt de redacción de la bitácora: además de las instrucciones de formato, incluía los datos que reportó cada integrante sobre su uso de la IA (herramienta, para qué la usó y qué corrigió). Esos datos están resumidos en la tabla de arriba.
+
+```text
+Escribe docs/architecture/bitacora-ia.md con la plantilla de la guía. Trabaja directamente en main, sin crear ramas. Muéstramelo antes de hacer commit. [...]
+Reglas:
+1. Las fechas salen de git log (fecha del commit de cada entregable). Si una fila no tiene commit asociado, pon <PENDIENTE: fecha>.
+2. Una fila por interacción real. Mínimo 5. [...]
+3. Decisión: Aceptada, Corregida o Rechazada según lo que dice arriba, con la evidencia que dieron mis compañeros. [...]
+4. Los prompts de E2 están completos en avance-lab04.md; ponlos en el "Anexo: prompts". Para las filas sin prompt conocido, escribe <PENDIENTE: prompt> y no lo inventes.
+```
+
+Prompt de redacción del README (E8): <PENDIENTE: prompt de E8>
