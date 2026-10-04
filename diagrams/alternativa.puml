@@ -1,0 +1,40 @@
+@startuml
+skinparam dpi 220
+skinparam componentStyle rectangle
+skinparam defaultFontName Arial
+skinparam backgroundColor white
+title Alternativa A (descartada): San Camilo en Línea con monolito en capas
+
+actor "Cliente" as CL
+actor "Comerciante" as CO
+actor "Repartidor" as RE
+
+node "Servidor único" {
+  package "Monolito en capas" {
+    [Capa de presentación\n(Interfaz Web / PWA móvil)] as PRES
+    [Capa de lógica de negocio\n(catálogo, pedidos, pagos,\nnotificaciones, delivery)] as BL
+    [Capa de acceso a datos] as DAL
+  }
+  database "Base de datos\nrelacional" as DB
+}
+
+cloud "Yape /\nproveedor de pago" as Y
+cloud "Servicio de\nWhatsApp" as W
+
+CL --> PRES
+CO --> PRES
+RE --> PRES
+PRES --> BL
+BL --> DAL
+DAL --> DB
+BL ..> Y : pago
+BL ..> W : confirmación
+
+note bottom of BL
+  Puntaje 4,70 frente a 4,85 del monolito modular.
+  Es simple y rápida de construir, pero la lógica de
+  negocio queda en una sola capa sin fronteras entre
+  funciones (modificabilidad 3/5): cambiar el pago o
+  el delivery puede afectar a pedidos y notificaciones.
+end note
+@enduml
