@@ -37,3 +37,4 @@ aplicación en un único servidor.
   (se revisará en los Pull Requests y con una herramienta como import-linter en la CI); una
   falla grave afecta a toda la aplicación; la base de datos única puede ser punto de contención
   si la demanda crece mucho.
+"" 
