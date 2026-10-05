@@ -84,6 +84,20 @@ flowchart TB
 - [Vista de despliegue con Python Diagrams (E6)](diagrams/despliegue.py)
 - [Bitácora de uso de IA (E7)](docs/architecture/bitacora-ia.md)
 
+## Imágenes de los diagramas
+
+### Arquitectura elegida: monolito modular (E3, Mermaid)
+
+![Arquitectura elegida: monolito modular](diagrams/img/arquitectura.png)
+
+### Alternativa descartada: monolito en capas (E5, PlantUML)
+
+![Alternativa descartada: monolito en capas](diagrams/img/alternativa.png)
+
+### Vista de despliegue (E6, Python Diagrams)
+
+![Vista de despliegue](diagrams/img/despliegue.png)
+
 ## Reflexión sobre el uso de la IA
 
 La IA nos ayudó a avanzar más rápido. Con ChatGPT generamos y comparamos alternativas, y le pedimos una crítica adversarial. Gemini nos dio borradores de los ADR, Claude escribió el código de PlantUML y de Python Diagrams, y Claude Code nos ayudó a ordenar la bitácora y este README.
