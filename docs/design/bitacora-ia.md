@@ -11,6 +11,8 @@ Regla de oro: la IA propone, el equipo decide y verifica (reglas C1–C5). No se
 | 5 | 2026-10-10 | Claude Code | E1 · Revisión del borrador: estados de `PedidoPuesto` (Prompt P3). | `EstadoPedidoPuesto` = PENDIENTE, RECIBIDO, ACEPTADO, LISTO, RECHAZADO, con la operación `aceptar()`. | No coincide con la Tabla 7 de la guía. Se cambió a RECIBIDO, LISTO, RECOGIDO, ENTREGADO, RECHAZADO. Se quitó `aceptar()` y se agregaron `registrarRecojo()` y `registrarEntrega()`. | Corregida |
 | 6 | 2026-10-10 | Claude Code | E1 · Revisión del borrador: clases que no salen de la historia (Prompt P3). | Clase `Comerciante` (duplica el celular del puesto) y clase `Devolucion` con `estado: String`. | RF-06 notifica al puesto (`Puesto.celularWhatsApp`). La devolución solo se registra y se hace a mano (supuesto 3). Se quitó `Comerciante` y `Devolucion` pasó a ser los atributos `montoDevolver` y `motivoRechazo` de `PedidoPuesto`. | Rechazada |
 | 7 | 2026-10-10 | Claude Code | E1 · Autorrevisión de `clases.puml` antes del commit (sin un prompt nuevo; la IA lo señaló por su cuenta). | La IA detectó que su propia corrección de la fila 3, `PedidoPuesto "1" o-- "1..*" LineaPedido`, obliga a que cada línea tenga siempre un PedidoPuesto, lo que no se cumple en BORRADOR ni en CANCELADO. Propuso cambiarlo a `"0..1"`. | Cristhian lo verificó contra CA-2 (sin PedidoPuesto si el pago falla) y la regla C3. Se cambió a `"0..1"` y se amplió la nota del diagrama. | Aceptada |
+| 8 | 2026-10-10 | Claude Code | E2 · Generar el diagrama de secuencia "pedido a varios puestos con pago único" en PlantUML, siguiendo el esqueleto de `CLAUDE.md` (Prompt P4). | `secuencia-pedido-multipuesto.puml`: 9 líneas de vida, `alt` aprobado/rechazado, 3 `loop`, `->>` hacia el Notificador. Además propuso 4 decisiones: (1) `dividirPorPuesto()` lo llama el servicio, (2) no agregar `PedidoController` a clases, (3) no modelar "stock insuficiente", (4) mensajes de stock a la línea de vida `Producto`. La propia IA corrigió los retornos de las operaciones `void`, que pasaron a "ok (estado X)". | Cristhian revisó las 4 decisiones (Prompt P5). (1) Aprobada con ajustes: `dividirPorPuesto()` agrega los PedidoPuesto a la composición y los devuelve, y `registrarPago()`, `dividirPorPuesto()` y `guardar()` van en un `group` de transacción. (3) y (4) aprobadas: la reserva parcial queda como limitación y se explica por qué `LineaPedido` no es línea de vida. (2) Rechazada (ver fila 9). | Corregida |
+| 9 | 2026-10-10 | Claude Code | E2 · Revisión de la decisión 2: ¿se agrega `PedidoController` al diagrama de clases? (Prompt P5) | La IA propuso no agregarlo porque es de la capa web y porque E1 ya tenía un commit. | Cristhian lo rechazó: E2 paso 5 pide corregir el diagrama de clases cuando C1 lo requiera, y que E1 tenga un commit no es razón para no hacerlo. Se agregó `PedidoController <<controlador>>` con `pagarPedido(id, celularYape)` y `PedidoController ..> ServicioPedidos` (commit `E1: agrega controlador`). El mensaje 2 de la secuencia ahora es `pagarPedido(...)`. | Rechazada |
 
 ## Anexo: prompts
 
@@ -46,3 +48,24 @@ NO escribas todavía la versión final: yo confirmo cada decisión.
 ```
 
 Respuesta del equipo: "Acepto todas tus sugerencias, sigue con clases.puml final".
+
+**P4 — Diagrama de secuencia (E2)**
+
+```text
+Ahora vamos con E2.
+```
+
+La IA siguió la sección 5 de `CLAUDE.md`: 9 líneas de vida (actor Cliente, PWA, PedidoController, ServicioPedidos, RepositorioPedidos, Pedido, Producto, PasarelaPago/YapeAdapter, Notificador/WhatsAppNotificador), con `alt` para pago aprobado y para pago rechazado o sin respuesta en 15 min (CA-2), `loop` por línea y por PedidoPuesto, un `->>` hacia el Notificador y la verificación C1.
+
+**P5 — Revisión de las decisiones de E2 (del equipo a la IA)**
+
+```text
+Revisé tus 4 decisiones. Aprobadas: 1 (con ajuste), 3 y 4. La 2 la cambiamos.
+
+1. dividirPorPuesto() lo llama el servicio. De acuerdo, pero: (a) el método debe agregar los PedidoPuesto a la composición del Pedido Y devolverlos; (b) en la secuencia deja claro que registrarPago(), dividirPorPuesto() y guardar(pedido) ocurren en la misma transacción; (c) anota en el informe que nos apartamos de CLAUDE.md y por qué.
+2. Sí agrega PedidoController <<controlador>> a clases.puml con la operación pagarPedido(id: UUID, celularYape: String). El argumento de que E1 ya está commiteado no vale: E2 paso 5 pide corregir el diagrama de clases cuando C1 lo requiera. Haz un commit separado "E1: agrega controlador" y verifica que mantiene multiplicidades y que PedidoController ..> ServicioPedidos. Los mensajes de la PWA y del actor se documentan en la tabla C1 como mensajes de interfaz fuera del alcance.
+3. Sin "stock insuficiente". Déjalo como limitación y menciona el caso de reserva parcial (primera línea reservada, segunda falla) cubierto por el camino de cancelar() + liberarStock().
+4. Mensajes a Producto: bien. Como Pedido llega a Producto vía LineaPedido, agrega LineaPedido como línea de vida en los loops, o explica en el informe por qué no. El camino de error debe tener su propio loop con liberarStock().
+
+Aplica esto y continúa con E2 solo después de mostrarme el commit de ajuste de E1.
+```
