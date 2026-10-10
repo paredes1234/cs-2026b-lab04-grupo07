@@ -1,0 +1,142 @@
+@startuml clases
+skinparam classAttributeIconSize 0
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam classBackgroundColor #EEF2F8
+skinparam classBorderColor #1A3A5C
+title San Camilo en Línea — Pedido multipuesto (diseño)
+skinparam nodesep 25
+skinparam ranksep 40
+
+package "catalogo" {
+  class Puesto {
+    - id: UUID
+    - nombre: String
+    - celularWhatsApp: String
+  }
+  class Producto {
+    - id: UUID
+    - nombre: String
+    - precio: Decimal
+    - stockDisponible: int
+    + reservarStock(cantidad: int): void
+    + liberarStock(cantidad: int): void
+  }
+}
+
+package "pedidos" {
+  class Cliente {
+    - id: UUID
+    - nombre: String
+  }
+  class Pedido {
+    - id: UUID
+    - fecha: DateTime
+    - estado: EstadoPedido
+    - modalidad: ModalidadEntrega
+    + agregarLinea(producto: Producto, cantidad: int): void
+    + calcularTotal(): Decimal
+    + confirmar(): void
+    + registrarPago(pago: Pago): void
+    + dividirPorPuesto(): List<PedidoPuesto>
+    + cancelar(motivo: String): void
+  }
+  class LineaPedido {
+    - cantidad: int
+    - precioUnitario: Decimal
+    + subtotal(): Decimal
+  }
+  class PedidoPuesto {
+    - id: UUID
+    - estado: EstadoPedidoPuesto
+    - montoDevolver: Decimal
+    - motivoRechazo: String
+    + calcularSubtotal(): Decimal
+    + marcarListo(): void
+    + registrarRecojo(): void
+    + registrarEntrega(): void
+    + rechazar(motivo: String): void
+  }
+  enum EstadoPedido {
+    BORRADOR
+    PAGO_PENDIENTE
+    PAGADO
+    CANCELADO
+  }
+  enum EstadoPedidoPuesto {
+    RECIBIDO
+    LISTO
+    RECOGIDO
+    ENTREGADO
+    RECHAZADO
+  }
+  enum ModalidadEntrega {
+    RECOJO
+    DELIVERY
+  }
+  class ServicioPedidos <<servicio>> {
+    + confirmarYPagar(pedidoId: UUID, celularYape: String): Pedido
+  }
+  interface RepositorioPedidos <<puerto>> {
+    + buscar(id: UUID): Pedido
+    + guardar(p: Pedido): void
+  }
+}
+
+package "pagos" {
+  class Pago {
+    - id: UUID
+    - monto: Decimal
+    - codigoOperacion: String
+    - aprobado: bool
+    - fecha: DateTime
+  }
+  interface PasarelaPago <<puerto>> {
+    + cobrar(monto: Decimal, celular: String, referencia: String): Pago
+  }
+  class YapeAdapter <<adaptador>> {
+    + cobrar(monto: Decimal, celular: String, referencia: String): Pago
+  }
+}
+
+package "notificaciones" {
+  interface Notificador <<puerto>> {
+    + notificarPedidoPuesto(pp: PedidoPuesto): void
+  }
+  class WhatsAppNotificador <<adaptador>> {
+    + notificarPedidoPuesto(pp: PedidoPuesto): void
+  }
+}
+
+Cliente "1" -- "0..*" Pedido : realiza >
+Pedido "1" *-- "1..*" LineaPedido
+Pedido "1" *-- "0..*" PedidoPuesto
+PedidoPuesto "0..1" o-- "1..*" LineaPedido
+PedidoPuesto "0..*" -- "1" Puesto : atendido por >
+LineaPedido "0..*" --> "1" Producto
+Puesto "1" *-- "0..*" Producto : ofrece >
+Pedido "1" -- "0..1" Pago : se paga con >
+PasarelaPago <|.. YapeAdapter
+PasarelaPago -[hidden]down- Pago
+Notificador <|.. WhatsAppNotificador
+ServicioPedidos ..> Pedido
+ServicioPedidos ..> RepositorioPedidos
+ServicioPedidos ..> PasarelaPago
+ServicioPedidos ..> Notificador
+
+note left of PedidoPuesto
+  0 PedidoPuesto en BORRADOR, PAGO_PENDIENTE
+  o CANCELADO (CA-2); 1..* desde PAGADO:
+  dividirPorPuesto() crea uno por puesto (CA-1)
+  y agrupa las líneas que ya son del Pedido
+  (cada línea: 0 PedidoPuesto antes del pago, 1 después).
+end note
+note bottom of Pago
+  No guarda el celular de Yape del cliente:
+  se pasa a cobrar() y no se persiste (R-04).
+end note
+note bottom of WhatsAppNotificador
+  Encola la tarea en Celery + Redis;
+  reintentos <= 10 min (ADR-003, QA-03).
+end note
+@enduml
