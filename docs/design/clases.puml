@@ -74,6 +74,9 @@ package "pedidos" {
     RECOJO
     DELIVERY
   }
+  class PedidoController <<controlador>> {
+    + pagarPedido(id: UUID, celularYape: String)
+  }
   class ServicioPedidos <<servicio>> {
     + confirmarYPagar(pedidoId: UUID, celularYape: String): Pedido
   }
@@ -119,6 +122,7 @@ Pedido "1" -- "0..1" Pago : se paga con >
 PasarelaPago <|.. YapeAdapter
 PasarelaPago -[hidden]down- Pago
 Notificador <|.. WhatsAppNotificador
+PedidoController ..> ServicioPedidos
 ServicioPedidos ..> Pedido
 ServicioPedidos ..> RepositorioPedidos
 ServicioPedidos ..> PasarelaPago
@@ -127,8 +131,9 @@ ServicioPedidos ..> Notificador
 note left of PedidoPuesto
   0 PedidoPuesto en BORRADOR, PAGO_PENDIENTE
   o CANCELADO (CA-2); 1..* desde PAGADO:
-  dividirPorPuesto() crea uno por puesto (CA-1)
-  y agrupa las líneas que ya son del Pedido
+  dividirPorPuesto() crea uno por puesto (CA-1),
+  los agrega a la composición del Pedido y los devuelve;
+  cada uno agrupa las líneas que ya son del Pedido
   (cada línea: 0 PedidoPuesto antes del pago, 1 después).
 end note
 note bottom of Pago
