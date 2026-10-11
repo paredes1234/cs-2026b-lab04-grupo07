@@ -91,3 +91,23 @@ Decisiones de E3 aprobadas, con estos ajustes:
 5. Sí incluye en el informe la lista de pruebas de E3: 6 pruebas (una por transición con evento, aclarando que las 2 hacia [*] no tienen operación) más las pruebas negativas de las guardas. Esto alimenta la pregunta 5 del cuestionario.
 6. Muéstrame el .mmd final y el PNG renderizado. Revisa que los estados coincidan letra por letra con EstadoPedidoPuesto en clases.puml. Si hay cambios en clases.puml, van en el mismo commit "E3: estados". No hagas push todavía.
 ```
+# Anexo para agregar a `bitacora-ia.md` (E7)
+
+El PR #4 ya contiene **10 interacciones de IA** y siete prompts anexos. **No reemplazar ni borrar** esa bitácora al fusionar ramas. Agregar esta fila al final de la tabla existente (antes de `## Anexo: prompts`), después de cotejarla con la versión definitiva de los diagramas:
+
+| 11 | 2026-10-10 | ChatGPT (GPT-6) | Prompt IA 3: «Audita cinco diagramas UML de San Camilo en Línea contra C1–C5, con referencias a archivos y líneas; no reescribas diagramas». | Señaló un conflicto C4 del puerto `Notificador`, la ambigüedad E2/E4 en el orden del pago, la notificación a un número variable de puestos y sospechas C1/C2 por navegación indirecta y evento de creación. | Contraste documental con `clases.puml`, `secuencia-pedido-multipuesto.puml`, `estados-pedidopuesto.mmd` (PR #4), más E4/E5 (informe, pp. 13–18). Las sospechas de asociación directa a `Producto` (C1) y del evento `Pedido.dividirPorPuesto()` (C2) resultaron falsos positivos; el conflicto C4 sí es real. Ver `consistencia.md`. Validación final por otro integrante pendiente. | **Corregir** C4 y precisar E4; **rechazar** los falsos positivos H-02 y H-03; pendiente revisión humana. |
+
+## Prompt completo de la interacción 11
+
+```text
+Actúa como revisor de diseño. Te paso cinco diagramas UML en PlantUML/Mermaid:
+clases.puml, secuencia-pedido-multipuesto.puml,
+estados-pedidopuesto.mmd, actividades-pedido-multipuesto.puml y paquetes.puml.
+Verifica estas reglas y responde en una tabla (regla, elemento, problema,
+corrección sugerida): C1 mensajes vs operaciones receptoras, C2 transiciones
+vs operaciones/eventos, C3 multiplicidades y criterios, C4 dependencias
+acíclicas y ADR-001/ADR-004, C5 nombres coherentes. Cita las líneas.
+No reescribas diagramas; reporta y después coteja los hallazgos.
+```
+
+> La revisión fue realizada por IA en este chat. No atribuir al equipo una revisión humana ni un cambio de código que todavía no se haya realizado.
