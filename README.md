@@ -105,3 +105,34 @@ También cometió errores. Asumió infraestructura en AWS aunque nuestra restric
 Además, no aceptamos dar por hecho que Yape tiene una API pública abierta sin verificarlo, así que en la arquitectura dejamos "Yape / proveedor de pago".
 Aprendimos a contrastar cada propuesta con nuestras restricciones (plazo de 1 mes, presupuesto bajo, equipo de 3), a ejecutar y validar todo el código generado y a no afirmar capacidades de servicios externos sin documentación oficial.
 La IA propone, pero el equipo decide y verifica.
+
+
+## Diseño UML (Lab 05)
+
+En el Laboratorio 05 se realizó el diseño detallado del sistema San Camilo en Línea mediante cinco diagramas UML.
+
+### Diagrama de estados — PedidoPuesto
+
+```mermaid
+stateDiagram-v2
+    [*] --> RECIBIDO : Pedido.dividirPorPuesto()
+    RECIBIDO --> LISTO : marcarListo()
+    RECIBIDO --> RECHAZADO : rechazar(motivo)
+    LISTO --> RECOGIDO : registrarRecojo()
+    LISTO --> ENTREGADO : registrarEntrega()
+    RECOGIDO --> ENTREGADO : registrarEntrega()
+    ENTREGADO --> [*]
+    RECHAZADO --> [*]
+```
+
+### Diagramas UML
+
+- [Diagrama de clases](docs/design/clases.puml)
+- [Diagrama de secuencia](docs/design/secuencia-pedido-multipuesto.puml)
+- [Diagrama de estados](docs/design/estados-pedidopuesto.mmd)
+- [Diagrama de actividades](docs/design/actividades-atender-pedido.puml)
+- [Diagrama de paquetes](docs/design/paquetes.puml)
+
+### Imágenes de los diagramas
+
+[Ver imágenes de los diagramas UML](docs/design/img/)
