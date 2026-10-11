@@ -1,0 +1,38 @@
+# E7 — Auditoría de consistencia UML (San Camilo en Línea)
+
+**Fecha:** 2026-10-10  
+**Caso:** HU-03, pedido a varios puestos con pago único mediante Yape.  
+**Referencia:** Guía del Lab 05, Prompt IA 3 (auditor de consistencia), reglas C1–C5.  
+**Fuente de revisión:** `clases.puml`, `secuencia-pedido-multipuesto.puml` y `estados-pedidopuesto.mmd` de la rama del PR #4 (`lab05/e1-e3-cristhian`); `actividades-pedido-multipuesto.puml` y `paquetes.puml` transcritos del informe Lab 05 (pp. 13–18). **Los archivos E4/E5 no estaban publicados en `main` ni en el PR #4 al consultar el repositorio.** Se debe volver a ejecutar la auditoría cuando se integren las cinco versiones definitivas.
+
+## Prompt IA 3 aplicado
+
+> Actúa como revisor de diseño. Te paso cinco diagramas UML en PlantUML/Mermaid: `clases.puml`, `secuencia-pedido-multipuesto.puml`, `estados-pedidopuesto.mmd`, `actividades-pedido-multipuesto.puml` y `paquetes.puml`. Verifica: C1, cada mensaje de secuencia es una operación de la clase receptora; C2, cada transición de estados corresponde a una operación o evento identificable; C3, multiplicidades coherentes con criterios de aceptación; C4, paquetes sin ciclos y compatibles con ADR-001/ADR-004; C5, nombres consistentes. Responde en tabla (regla, elemento, problema, corrección sugerida), citando archivo y línea. No reescribas los diagramas; solo reporta hallazgos.
+
+## Hallazgos de IA y verificación
+
+| ID | Regla | Elemento y referencia | Hallazgo o sospecha de la IA | Verificación a partir de los artefactos | Decisión |
+|---|---|---|---|---|---|
+| H-01 | **C4** | `clases.puml` líneas 100–107 y 123; `paquetes.puml`, dependencia `NOT ..> PED`; ADR-004 (informe, pp. 18–19) | El puerto `Notificador` está en el paquete `notificaciones`, aunque la decisión arquitectónica lo ubica en `pedidos`. `ServicioPedidos ..> Notificador` crea una dependencia `pedidos -> notificaciones` mientras el paquete de notificaciones requiere `PedidoPuesto` (`notificaciones -> pedidos`). | **Confirmado.** El diagrama de paquetes y el ADR-004 afirman que `Notificador` pertenece a `pedidos`, pero el diagrama de clases aún lo declara en `notificaciones`. Al combinar las dependencias se reintroduce un ciclo lógico. | **Corregir** en `clases.puml`: mover solo la interfaz `Notificador` al paquete `pedidos`; mantener `WhatsAppNotificador` en `notificaciones` implementando dicho puerto. Revisar de nuevo C4. |
+| H-02 | **C1** | `secuencia-pedido-multipuesto.puml` líneas 20–23, 63–66; `clases.puml` líneas 20–21 y 109, 113 | «Falta una asociación directa `Pedido -- Producto` para que `Pedido` invoque `reservarStock()` y `liberarStock()`». | **FALSO POSITIVO.** C1 exige que el método exista en **el receptor**: `Producto` sí tiene ambas operaciones. Además, `Pedido` contiene `LineaPedido`, y cada línea se relaciona con `Producto`. Esa navegación indirecta es válida; no se necesita una asociación duplicada entre `Pedido` y `Producto`. | **Rechazar** el hallazgo; no agregar asociación. Explicar esta navegación en la revisión cruzada. |
+| H-03 | **C2** | `estados-pedidopuesto.mmd` línea 4; `clases.puml` línea 38 | «`PedidoPuesto` no declara `dividirPorPuesto()` para la transición inicial a `RECIBIDO`». | **FALSO POSITIVO.** La transición desde `[*]` describe el *evento de creación* del `PedidoPuesto`, originado por `Pedido.dividirPorPuesto()`; no es una operación del `PedidoPuesto` ya creado. Está explícitamente calificada con `Pedido.` y existe en la clase `Pedido`. | **Rechazar** el hallazgo. Mantener el evento calificado y documentar su significado. |
+| H-04 | **C5** (coherencia del flujo) | `secuencia-pedido-multipuesto.puml` líneas 20–28; actividades en el informe, pp. 14–15 | El flujo de actividades dice que el cliente «Realiza el pago con Yape» antes de que el sistema valide y reserve el stock, mientras que la secuencia primero confirma/reserva y después solicita `cobrar(...)`. | **Confirmado como ambigüedad de orden.** En el flujo de secuencia, el cobro ocurre después de la reserva de stock. En actividades, la acción «Realiza el pago» parece situar el cobro antes de esa validación. | **Corregir la redacción** en actividades a «Solicita pagar con Yape» y dejar explícito que la pasarela cobra después de validar/reservar el stock. **Aplicado solo a la copia propuesta del ZIP**, pendiente de integrar en Git. |
+| H-05 | **C3** (alcance multipuesto) | Actividades, informe pp. 14–15; HU-03 CA-1 (`historia.md`) | El `fork` de actividades nombra solo «Puesto A» y «Puesto B», aunque la historia admite pedidos de dos **o más** puestos. | **Parcialmente confirmado.** Es válido como escenario ilustrativo con dos puestos, pero no describe de forma explícita un número variable de `PedidoPuesto`. | **Aclarar** con una nota que A y B son un ejemplo o modelar «por cada PedidoPuesto» manteniendo el paralelismo `fork/join` requerido por E4. **Nota añadida a la copia propuesta del ZIP**, aún pendiente de PR. |
+| H-06 | **C3** | `clases.puml` línea 109 (`Pedido "1" *-- "1..*" LineaPedido`) | Un pedido en BORRADOR recién creado podría no contener líneas, por lo que `1..*` sería excesivo. | **No demostrado.** La historia sí exige líneas al *confirmar* (CA-1), pero no define formalmente si existe un BORRADOR vacío antes de agregar productos. | **Pendiente de decisión del equipo.** Si se admite el borrador vacío, modelar `0..*` y validar `>=1` en `confirmar()`. Si todo `Pedido` nace con una línea, conservar `1..*` y documentarlo como regla de negocio. |
+| H-07 | **C1 / C2 / C5** | `secuencia-pedido-multipuesto.puml` líneas 16–18, 28, 36, 38, 40, 48; `estados-pedidopuesto.mmd` líneas 5–9; `clases.puml` líneas 36–55, 75–82, 94, 102 | Comprobar si faltan operaciones en los receptores o si los nombres de las transiciones de estados difieren de las clases. | **Sin incumplimiento adicional encontrado** en estos mensajes y transiciones: `pagarPedido`, `confirmarYPagar`, `cobrar`, `registrarPago`, `dividirPorPuesto`, `guardar`, `notificarPedidoPuesto`, `marcarListo`, `rechazar`, `registrarRecojo`, `registrarEntrega` aparecen en las clases correspondientes. Las flechas punteadas de retorno no requieren operaciones nuevas. | **Aceptar** los nombres y métodos revisados, sin cambios en C1/C2. |
+
+## Resultado y acciones antes del merge
+
+- **Hallazgo confirmado prioritario:** H-01 (C4), coherencia del puerto `Notificador` y ADR-004.
+- **Ajustes recomendados:** H-04 (redacción del cobro) y H-05 (alcance de multipuesto). H-06 requiere decisión del grupo.
+- **Falsos positivos justificados:** H-02 (C1, acceso a `Producto` mediante `LineaPedido`) y H-03 (C2, evento de creación desde `Pedido`). **No se debe modificar el modelo por estos avisos.**
+- **Verificación cruzada humana pendiente:** un integrante distinto del autor del PR debe revisar los hallazgos y confirmar las decisiones en GitHub. Esta auditoría de IA y cotejo documental no sustituye su aprobación.
+- **Repetición obligatoria:** contrastar con los cinco archivos `.puml`/`.mmd` definitivos tras fusionar PR y E4/E5. El informe PDF puede diferir de los archivos efectivamente subidos.
+
+## Evidencia y enlaces consultados
+
+- PR #4 (E1–E3): https://github.com/paredes1234/cs-2026b-lab04-grupo07/pull/4
+- Diagrama de clases: https://raw.githubusercontent.com/paredes1234/cs-2026b-lab04-grupo07/lab05/e1-e3-cristhian/docs/design/clases.puml
+- Secuencia: https://raw.githubusercontent.com/paredes1234/cs-2026b-lab04-grupo07/lab05/e1-e3-cristhian/docs/design/secuencia-pedido-multipuesto.puml
+- Estados: https://raw.githubusercontent.com/paredes1234/cs-2026b-lab04-grupo07/lab05/e1-e3-cristhian/docs/design/estados-pedidopuesto.mmd
+- Actividades y paquetes: informe `LAB_05_CS-Flores_Jimenez_Bravo.pdf`, pp. 13–19.
