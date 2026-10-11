@@ -1,0 +1,48 @@
+Listado de rutas de carpetas
+El número de serie del volumen es BDE6-8937
+C:.
+¦   estructura.txt
+¦   README.md
+¦   
++---diagrams
+¦   ¦   alternativa.puml
+¦   ¦   arquitectura.mmd
+¦   ¦   classes_pedidos.puml
+¦   ¦   classes_pedidos_pyreverse.png
+¦   ¦   despliegue.py
+¦   ¦   
+¦   +---img
+¦           alternativa.png
+¦           arquitectura-san-camilo.png
+¦           arquitectura.png
+¦           despliegue.png
+¦           
++---docs
+¦   +---architecture
+¦   ¦       001-estilo-arquitectonico.md
+¦   ¦       002-pwa-vs-app-nativa.md
+¦   ¦       003-notificaciones-asincronas.md
+¦   ¦       004-puerto-notificador-en-pedidos.md
+¦   ¦       bitacora-ia.md
+¦   ¦       drivers.md
+¦   ¦       matriz-decision.md
+¦   ¦       
+¦   +---design
+¦       ¦   bitacora-ia.md
+¦       ¦   clases.puml
+¦       ¦   estados-pedidopuesto.mmd
+¦       ¦   historia.md
+¦       ¦   paquetes.puml
+¦       ¦   round-trip.md
+¦       ¦   secuencia-pedido-multipuesto.puml
+¦       ¦   
+¦       +---img
+¦               clases.png
+¦               estados-pedidopuesto.png
+¦               paquetes.png
+¦               secuencia-pedido-multipuesto.png
+¦               
++---src
+    +---pedidos
+            dominio.py
+            
