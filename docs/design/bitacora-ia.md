@@ -13,6 +13,7 @@ Regla de oro: la IA propone, el equipo decide y verifica (reglas C1–C5). No se
 | 7 | 2026-10-10 | Claude Code | E1 · Autorrevisión de `clases.puml` antes del commit (sin un prompt nuevo; la IA lo señaló por su cuenta). | La IA detectó que su propia corrección de la fila 3, `PedidoPuesto "1" o-- "1..*" LineaPedido`, obliga a que cada línea tenga siempre un PedidoPuesto, lo que no se cumple en BORRADOR ni en CANCELADO. Propuso cambiarlo a `"0..1"`. | Cristhian lo verificó contra CA-2 (sin PedidoPuesto si el pago falla) y la regla C3. Se cambió a `"0..1"` y se amplió la nota del diagrama. | Aceptada |
 | 8 | 2026-10-10 | Claude Code | E2 · Generar el diagrama de secuencia "pedido a varios puestos con pago único" en PlantUML, siguiendo el esqueleto de `CLAUDE.md` (Prompt P4). | `secuencia-pedido-multipuesto.puml`: 9 líneas de vida, `alt` aprobado/rechazado, 3 `loop`, `->>` hacia el Notificador. Además propuso 4 decisiones: (1) `dividirPorPuesto()` lo llama el servicio, (2) no agregar `PedidoController` a clases, (3) no modelar "stock insuficiente", (4) mensajes de stock a la línea de vida `Producto`. La propia IA corrigió los retornos de las operaciones `void`, que pasaron a "ok (estado X)". | Cristhian revisó las 4 decisiones (Prompt P5). (1) Aprobada con ajustes: `dividirPorPuesto()` agrega los PedidoPuesto a la composición y los devuelve, y `registrarPago()`, `dividirPorPuesto()` y `guardar()` van en un `group` de transacción. (3) y (4) aprobadas: la reserva parcial queda como limitación y se explica por qué `LineaPedido` no es línea de vida. (2) Rechazada (ver fila 9). | Corregida |
 | 9 | 2026-10-10 | Claude Code | E2 · Revisión de la decisión 2: ¿se agrega `PedidoController` al diagrama de clases? (Prompt P5) | La IA propuso no agregarlo porque es de la capa web y porque E1 ya tenía un commit. | Cristhian lo rechazó: E2 paso 5 pide corregir el diagrama de clases cuando C1 lo requiera, y que E1 tenga un commit no es razón para no hacerlo. Se agregó `PedidoController <<controlador>>` con `pagarPedido(id, celularYape)` y `PedidoController ..> ServicioPedidos` (commit `E1: agrega controlador`). El mensaje 2 de la secuencia ahora es `pagarPedido(...)`. | Rechazada |
+| 10 | 2026-10-10 | Claude Code | E3 · Generar la máquina de estados de `PedidoPuesto` en Mermaid, con los estados de la Tabla 7 y transiciones nombradas con operaciones (Prompts P6 y P7). | `estados-pedidopuesto.mmd`: 5 estados, `[*]` inicial y 2 finales, 6 guardas. La transición inicial es `Pedido.dividirPorPuesto()`, como evento de creación. La transición de rechazo lleva la acción `/ registra montoDevolver`. La nota de RECIBIDO dice que la notificación la encola el servicio (no es una acción de entrada, por coherencia con E2). `rechazar()` solo desde RECIBIDO. Dos huecos quedan como riesgo. La guarda del rechazo era `[sin stock real]`. | Cristhian aprobó las 5 decisiones con ajustes (P7): se verificó que `montoDevolver` se llama igual en `clases.puml` y en el diagrama (C5, sin cambios); la guarda pasó a `[comerciante sin el producto]` para que quede claro quién la evalúa; la nota de RECIBIDO aclara que ServicioPedidos encola después de guardar y que no hay acción de entrada. Los estados coinciden letra por letra con `EstadoPedidoPuesto`. Validado con mermaid-cli. | Corregida |
 
 ## Anexo: prompts
 
@@ -68,4 +69,25 @@ Revisé tus 4 decisiones. Aprobadas: 1 (con ajuste), 3 y 4. La 2 la cambiamos.
 4. Mensajes a Producto: bien. Como Pedido llega a Producto vía LineaPedido, agrega LineaPedido como línea de vida en los loops, o explica en el informe por qué no. El camino de error debe tener su propio loop con liberarStock().
 
 Aplica esto y continúa con E2 solo después de mostrarme el commit de ajuste de E1.
+```
+
+**P6 — Máquina de estados (E3)**
+
+```text
+OK, sigue con E3
+```
+
+La IA siguió la sección 6 de `CLAUDE.md`: entidad PedidoPuesto con los estados RECIBIDO, LISTO, RECOGIDO, ENTREGADO y RECHAZADO; guardas sobre `ModalidadEntrega`; transiciones nombradas con operaciones de la clase (C2).
+
+**P7 — Ajustes del equipo a E3**
+
+```text
+Decisiones de E3 aprobadas, con estos ajustes:
+
+1. Verifica que el atributo del monto a devolver en PedidoPuesto tenga EXACTAMENTE el mismo nombre en clases.puml y en la acción de la transición de rechazo (C5). Si difiere, corrige el que corresponda y dime cuál.
+2. Cambia la guarda [sin stock real] por [comerciante sin el producto], para que quede claro quién la evalúa.
+3. Confirma que la nota de RECIBIDO diga que ServicioPedidos encola la notificación (Celery, reintentos ≤ 10 min, ADR-003) después de guardar el pedido, y que no hay acción de entrada en PedidoPuesto.
+4. En el informe, pon como riesgo principal de E3 el PedidoPuesto en RECIBIDO sin respuesta del comerciante: el cliente ya pagó y no hay timeout ni salida. Menciona también el LISTO que nadie recoge. Ninguno de los dos se modela en el MVP.
+5. Sí incluye en el informe la lista de pruebas de E3: 6 pruebas (una por transición con evento, aclarando que las 2 hacia [*] no tienen operación) más las pruebas negativas de las guardas. Esto alimenta la pregunta 5 del cuestionario.
+6. Muéstrame el .mmd final y el PNG renderizado. Revisa que los estados coincidan letra por letra con EstadoPedidoPuesto en clases.puml. Si hay cambios en clases.puml, van en el mismo commit "E3: estados". No hagas push todavía.
 ```
