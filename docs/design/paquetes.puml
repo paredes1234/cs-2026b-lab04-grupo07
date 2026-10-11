@@ -1,0 +1,48 @@
+@startuml paquetes
+
+title San Camilo en Línea - Diagrama de Paquetes (Lab 05)
+
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam packageStyle frame
+
+package "sancamilo" {
+  
+  package "ENT\nentrega" as entrega #F8FAFC {
+  }
+  
+  package "NOT\nnotificaciones" as notificaciones #F8FAFC {
+  }
+  
+  package "PED\npedidos" as pedidos #F8FAFC {
+  }
+  
+  package "CAT\ncatalogo" as catalogo #F8FAFC {
+  }
+  
+  package "PAG\npagos" as pagos #F8FAFC {
+  }
+  
+  package "COM\ncompartido" as compartido #F8FAFC {
+  }
+}
+
+' Relaciones de dependencia unidireccionales
+entrega ..> pedidos : "usa PedidoPuesto\n(registrarRecojo, registrarEntrega)"
+notificaciones ..> pedidos : "realiza Notificador\n(puerto) y usa PedidoPuesto"
+pedidos ..> catalogo : "usa Producto\n(reservarStock, liberarStock)"
+pedidos ..> pagos : "usa PasarelaPago\n(puerto) y Pago"
+
+entrega ..> compartido
+notificaciones ..> compartido
+pedidos ..> compartido
+catalogo ..> compartido
+pagos ..> compartido
+
+note right of pagos
+  Regla (ADR-001 y ADR-004): sin dependencias cíclicas.
+  Las flechas van hacia pedidos; pagos y catalogo NO dependen de pedidos.
+  El puerto Notificador pertenece a pedidos y notificaciones lo realiza.
+end note
+
+@enduml

@@ -1,0 +1,24 @@
+---
+title: San Camilo en Línea — Ciclo de vida de PedidoPuesto
+---
+stateDiagram-v2
+    [*] --> RECIBIDO : Pedido.dividirPorPuesto() [pago aprobado]
+    RECIBIDO --> LISTO : marcarListo() [productos completos]
+    RECIBIDO --> RECHAZADO : rechazar(motivo) [comerciante sin el producto] / registra montoDevolver
+    LISTO --> RECOGIDO : registrarRecojo() [modalidad = DELIVERY]
+    LISTO --> ENTREGADO : registrarEntrega() [modalidad = RECOJO]
+    RECOGIDO --> ENTREGADO : registrarEntrega()
+    ENTREGADO --> [*]
+    RECHAZADO --> [*]
+    note right of RECIBIDO
+        ServicioPedidos encola la notificación por WhatsApp
+        después de guardar el pedido (Celery, reintentos ≤ 10 min, ADR-003).
+        PedidoPuesto no tiene acción de entrada.
+    end note
+    note right of RECOGIDO
+        El repartidor recogió el paquete del puesto
+        (solo DELIVERY, RF-07)
+    end note
+    note left of RECHAZADO
+        Monto a devolver registrado; reembolso manual (CA-3)
+    end note

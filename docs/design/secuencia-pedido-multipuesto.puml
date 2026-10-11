@@ -1,0 +1,77 @@
+@startuml secuencia-pedido-multipuesto
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam sequenceMessageAlign center
+title San Camilo en Línea — Pedido a varios puestos con pago único (HU-03)
+autonumber
+actor Cliente
+participant "PWA" as UI
+participant "PedidoController" as C
+participant "ServicioPedidos" as S
+participant "RepositorioPedidos" as R
+participant "Pedido" as P
+participant "Producto" as PR
+participant "PasarelaPago\n(YapeAdapter)" as G
+participant "Notificador\n(WhatsAppNotificador)" as N
+
+Cliente -> UI : Pagar pedido con Yape
+UI -> C : pagarPedido(id, celularYape)\n[POST /pedidos/{id}/pago]
+C -> S : confirmarYPagar(id, celularYape)
+S -> R : buscar(id)
+R --> S : pedido
+S -> P : confirmar()
+loop por cada línea del pedido
+  P -> PR : reservarStock(cantidad)
+  PR --> P : ok
+end
+P --> S : ok (estado PAGO_PENDIENTE)
+S -> P : calcularTotal()
+P --> S : total
+S -> G : cobrar(total, celularYape, referencia)
+note right of G
+  El celular solo se usa para el cobro;
+  Pago no lo guarda (R-04).
+end note
+alt pago aprobado
+  G --> S : pago (aprobado)
+  group transacción (todo o nada)
+    S -> P : registrarPago(pago)
+    P --> S : ok (estado PAGADO)
+    S -> P : dividirPorPuesto()
+    P --> S : pedidosPuesto (RECIBIDO; agregados al Pedido)
+    S -> R : guardar(pedido)
+    R --> S : ok
+  end
+  note right of R
+    Si guardar() falla, no queda un pedido PAGADO
+    sin sus PedidoPuesto. Se notifica después del commit.
+  end note
+  loop por cada PedidoPuesto
+    S ->> N : notificarPedidoPuesto(pp)
+  end
+  note right of N
+    Asíncrono: encola la tarea en Celery + Redis;
+    reintentos <= 10 min (ADR-003, QA-03).
+    El pago no espera a WhatsApp.
+  end note
+  S --> C : pedido PAGADO
+  C --> UI : 201 Pedido pagado
+else pago rechazado o sin respuesta en 15 min
+  G --> S : pago (rechazado)
+  note right of G
+    Simplificación: el timeout de 15 min
+    se muestra como una respuesta de rechazo.
+  end note
+  S -> P : cancelar("pago rechazado")
+  loop por cada línea del pedido
+    P -> PR : liberarStock(cantidad)
+    PR --> P : ok
+  end
+  P --> S : ok (estado CANCELADO)
+  S -> R : guardar(pedido)
+  R --> S : ok
+  S --> C : pedido CANCELADO
+  C --> UI : 402 Pago rechazado
+end
+UI --> Cliente : Muestra el resultado
+@enduml
