@@ -1,0 +1,3 @@
+@startuml classes_pedidos
+set namespaceSeparator none
+@enduml

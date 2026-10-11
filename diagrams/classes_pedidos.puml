@@ -1,0 +1,100 @@
+@startuml classes_pedidos
+set namespaceSeparator none
+class "Cliente" as pedidos.dominio.Cliente {
+  id : UUID
+  nombre : str
+}
+class "EstadoPedido" as pedidos.dominio.EstadoPedido {
+  name
+}
+class "EstadoPedidoPuesto" as pedidos.dominio.EstadoPedidoPuesto {
+  name
+}
+class "LineaPedido" as pedidos.dominio.LineaPedido {
+  cantidad : int
+  precio_unitario : Decimal
+  producto
+  subtotal() -> Decimal
+}
+class "ModalidadEntrega" as pedidos.dominio.ModalidadEntrega {
+  name
+}
+class "Notificador" as pedidos.dominio.Notificador {
+  {abstract}notificar_pedido_puesto(pp: PedidoPuesto) -> None
+}
+class "Pago" as pedidos.dominio.Pago {
+  aprobado : bool
+  codigo_operacion : str
+  fecha : datetime
+  id : UUID
+  monto : Decimal
+}
+class "PasarelaPago" as pedidos.dominio.PasarelaPago {
+  {abstract}cobrar(monto: Decimal, celular: str, referencia: str) -> Pago
+}
+class "Pedido" as pedidos.dominio.Pedido {
+  cliente
+  estado
+  fecha : datetime
+  id : UUID
+  lineas : list[LineaPedido]
+  modalidad
+  pago : Pago | None
+  pedidos_puesto : list[PedidoPuesto]
+  agregar_linea(producto: Producto, cantidad: int) -> None
+  calcular_total() -> Decimal
+  cancelar(motivo: str) -> None
+  confirmar() -> None
+  dividir_por_puesto() -> list[PedidoPuesto]
+  registrar_pago(pago: Pago) -> None
+}
+class "PedidoPuesto" as pedidos.dominio.PedidoPuesto {
+  estado
+  id : UUID
+  lineas : list[LineaPedido]
+  monto_devolver : Decimal
+  motivo_rechazo : str
+  puesto
+  calcular_subtotal() -> Decimal
+  marcar_listo() -> None
+  rechazar(motivo: str) -> None
+  registrar_entrega() -> None
+  registrar_recojo() -> None
+}
+class "Producto" as pedidos.dominio.Producto {
+  id : UUID
+  nombre : str
+  precio : Decimal
+  puesto
+  stock_disponible : int
+  liberar_stock(cantidad: int) -> None
+  reservar_stock(cantidad: int) -> None
+}
+class "Puesto" as pedidos.dominio.Puesto {
+  celular_whatsapp : str
+  id : UUID
+  nombre : str
+}
+class "RepositorioPedidos" as pedidos.dominio.RepositorioPedidos {
+  {abstract}buscar(id: UUID) -> Pedido
+  {abstract}guardar(pedido: Pedido) -> None
+}
+class "ServicioPedidos" as pedidos.dominio.ServicioPedidos {
+  confirmar_y_pagar(pedido_id: UUID, celular_yape: str) -> Pedido
+}
+class "WhatsAppNotificador" as pedidos.dominio.WhatsAppNotificador {
+  {abstract}notificar_pedido_puesto(pp: PedidoPuesto) -> None
+}
+class "YapeAdapter" as pedidos.dominio.YapeAdapter {
+  {abstract}cobrar(monto: Decimal, celular: str, referencia: str) -> Pago
+}
+pedidos.dominio.WhatsAppNotificador --|> pedidos.dominio.Notificador
+pedidos.dominio.YapeAdapter --|> pedidos.dominio.PasarelaPago
+pedidos.dominio.Pedido --> pedidos.dominio.Cliente : cliente
+pedidos.dominio.Pedido --> pedidos.dominio.EstadoPedido : estado
+pedidos.dominio.PedidoPuesto --> pedidos.dominio.EstadoPedidoPuesto : estado
+pedidos.dominio.Pedido --> pedidos.dominio.ModalidadEntrega : modalidad
+pedidos.dominio.LineaPedido --> pedidos.dominio.Producto : producto
+pedidos.dominio.PedidoPuesto --> pedidos.dominio.Puesto : puesto
+pedidos.dominio.Producto --> pedidos.dominio.Puesto : puesto
+@enduml
