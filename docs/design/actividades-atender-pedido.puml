@@ -1,0 +1,104 @@
+@startuml actividades-pedido-multipuesto
+
+title San Camilo en Línea\nPreparación y consolidación de pedido multipuesto (HU-03)
+
+' ===== ESTILO GENERAL =====
+skinparam shadowing false
+skinparam dpi 150
+skinparam defaultFontName Arial
+skinparam defaultFontSize 12
+skinparam ArrowColor #52677D
+skinparam ArrowThickness 1.2
+skinparam activity {
+    BackgroundColor #F1F6FC
+    BorderColor #42658A
+    FontColor #20354A
+    DiamondBackgroundColor #FFF1CC
+    DiamondBorderColor #C18A24
+    DiamondFontColor #60430C
+    StartColor #27856B
+    EndColor #C94C4C
+    BarColor #42658A
+    FontSize 12
+}
+skinparam swimlane {
+    BorderColor #D2DCE7
+    TitleFontColor #20354A
+    TitleFontStyle bold
+}
+skinparam roundcorner 14
+skinparam padding 8
+
+' ===== FLUJO DEL PEDIDO =====
+
+|#EAF2FF|Cliente|
+start
+:Selecciona productos\nde dos o más puestos;
+:Confirma el pedido;
+:Realiza el pago con Yape;
+
+|#F1F6FC|Sistema|
+:Valida disponibilidad\ny reserva el stock;
+:Solicita el cobro a PasarelaPago;
+
+if (¿Pago aprobado?) then (Sí)
+
+    :Registra el pedido como PAGADO;
+    :dividirPorPuesto()\nCrea un PedidoPuesto por cada puesto;
+
+    fork
+        :Notifica por WhatsApp\nal Puesto A;
+    fork again
+        :Notifica por WhatsApp\nal Puesto B;
+    end fork
+
+    |#E8F6EE|Comerciante (Puesto)|
+    :Recibe notificación por WhatsApp;
+    :Revisa su PedidoPuesto;
+
+    if (¿Tiene todos\nlos productos?) then (Sí)
+        :marcarListo();
+        :PedidoPuesto = LISTO;
+    else (No)
+        :rechazar(motivo);
+        :Registra el monto a devolver;
+        :PedidoPuesto = RECHAZADO;
+    endif
+
+    |#F1F6FC|Sistema|
+    :Consolida los resultados\nde todos los puestos;
+    :Calcula el monto a devolver,\nsi corresponde;
+    :Informa al cliente sobre\nel estado de cada puesto;
+
+    if (¿Modalidad de entrega?) then (Delivery)
+        |#F3ECFF|Repartidor|
+        :Registra el recojo de los\nPedidoPuesto en estado LISTO;
+        :Traslada los productos;
+        :registrarEntrega()\nal cliente;
+
+    else (Recojo)
+        |#EAF2FF|Cliente|
+        :Acude al mercado y recoge\nlos productos disponibles;
+
+        |#F1F6FC|Sistema|
+        :registrarEntrega();
+    endif
+
+    |#EAF2FF|Cliente|
+    :Recibe los productos\ny la información de devolución;
+    stop
+
+else (No)
+
+    |#F1F6FC|Sistema|
+    :Cancela el pedido;
+    :Establece el estado CANCELADO;
+    :Libera el stock reservado;
+
+    |#EAF2FF|Cliente|
+    :Recibe la notificación\nde pago rechazado;
+    stop
+
+endif
+
+@enduml
