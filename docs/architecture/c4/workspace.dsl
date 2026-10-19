@@ -1,18 +1,18 @@
-workspace "San Camilo en Línea" "Modelo C4 (E1-E3, Laboratorio 06). Continuación de la arquitectura de los Labs 04 y 05." {
+workspace "San Camilo en Línea" "Modelo C4 (E1-E6, Laboratorio 06). Arquitectura completa." {
 
     !identifiers hierarchical
 
     model {
-        // E1: personas y sistemas (contexto)
+        // E1: Personas y sistemas (Contexto)
         cliente = person "Cliente" "Consulta productos, compra en varios puestos y paga un pedido único."
         comerciante = person "Comerciante" "Administra productos y prepara los pedidos de su puesto."
         repartidor = person "Repartidor" "Consulta pedidos de delivery y actualiza su entrega."
 
         sancamilo = softwareSystem "San Camilo en Línea" "Plataforma de compras del Mercado San Camilo: catálogo, pedidos multipuesto, pago y entrega." {
-            // E2: cada contenedor es una unidad de ejecución o un almacén; Docker NO es un contenedor C4.
+            // E2: Contenedores
             pwa = container "Aplicación web progresiva" "Interfaz móvil para clientes, comerciantes y repartidores." "HTML/CSS/JavaScript + Service Worker" "Web Browser"
             api = container "Aplicación web / API" "Monolito modular que procesa las operaciones del sistema mediante interfaces públicas." "Python / Django (HTTP/JSON)" {
-                // E3: componentes alineados con docs/design/paquetes.puml, no con el caso AgroConecta.
+                // E3: Componentes internos
                 catalogo = component "Catálogo" "Gestiona puestos, productos, disponibilidad y stock." "Módulo Python/Django"
                 pedidos = component "Pedidos" "Carrito, pago de pedido multipuesto, Pedido y PedidoPuesto; dueño del puerto Notificador." "Módulo Python/Django"
                 pagos = component "Pagos" "Gestiona cobros mediante la interfaz PasarelaPago y el adaptador Yape." "Módulo Python/Django"
@@ -28,14 +28,14 @@ workspace "San Camilo en Línea" "Modelo C4 (E1-E3, Laboratorio 06). Continuaci�
         pasarela = softwareSystem "Pasarela de pago Yape" "Proveedor externo utilizado mediante la interfaz PasarelaPago; integración abstracta en el MVP." "Externo"
         whatsapp = softwareSystem "Servicio de WhatsApp" "Servicio externo al que se envían las confirmaciones y notificaciones." "Externo"
 
-        // E1: las relaciones de contexto describen una intención, sin detallar tecnologías internas.
+        // E1: Relaciones de Contexto
         cliente -> sancamilo "Consulta el catálogo, realiza pedidos multipuesto y paga"
         comerciante -> sancamilo "Publica productos y atiende pedidos"
         repartidor -> sancamilo "Consulta entregas asignadas y actualiza su estado"
         sancamilo -> pasarela "Solicita el cobro de pedidos con Yape"
         sancamilo -> whatsapp "Envía confirmaciones a comerciantes"
 
-        // E2: relaciones entre contenedores, con descripción y protocolo.
+        // E2: Relaciones entre Contenedores
         cliente -> sancamilo.pwa "Realiza sus compras" "HTTPS"
         comerciante -> sancamilo.pwa "Gestiona su puesto" "HTTPS"
         repartidor -> sancamilo.pwa "Consulta y actualiza entregas" "HTTPS"
@@ -46,12 +46,11 @@ workspace "San Camilo en Línea" "Modelo C4 (E1-E3, Laboratorio 06). Continuaci�
         sancamilo.worker -> whatsapp "Envía mensajes y confirmaciones" "HTTPS/JSON"
         sancamilo.api -> pasarela "Solicita cobros mediante el adaptador Yape" "HTTPS/JSON"
 
-        // E3: llamadas hacia componentes desde la PWA.
+        // E3: Relaciones entre Componentes
         sancamilo.pwa -> sancamilo.api.catalogo "Consulta productos y puestos" "HTTPS/JSON"
         sancamilo.pwa -> sancamilo.api.pedidos "Confirma y paga pedidos" "HTTPS/JSON"
         sancamilo.pwa -> sancamilo.api.entrega "Consulta estado de recojo o delivery" "HTTPS/JSON"
 
-        // E3: dependencias de paquetes según Lab 05, sin ciclos.
         sancamilo.api.pedidos -> sancamilo.api.catalogo "Consulta productos, reserva y libera stock" "Llamada interna Python"
         sancamilo.api.pedidos -> sancamilo.api.pagos "Solicita y registra el cobro" "Llamada interna Python"
         sancamilo.api.notificaciones -> sancamilo.api.pedidos "Implementa el puerto Notificador y usa PedidoPuesto" "Interfaz Python"
@@ -67,6 +66,22 @@ workspace "San Camilo en Línea" "Modelo C4 (E1-E3, Laboratorio 06). Continuaci�
         sancamilo.api.notificaciones -> whatsapp "Envía notificaciones del pedido" "HTTPS/JSON"
         sancamilo.api.catalogo -> sancamilo.bd "Lee productos y stock" "SQL/TCP"
         sancamilo.api.pedidos -> sancamilo.bd "Guarda pedidos y estados" "SQL/TCP"
+
+        // E5: Entorno de Despliegue
+        produccion = deploymentEnvironment "Producción" {
+            deploymentNode "Celular del usuario" "Dispositivo de gama baja (R-05)" "Android + Chrome" {
+                containerInstance sancamilo.pwa
+            }
+            deploymentNode "Servidor VPS en la nube" "Un único servidor para el MVP (ADR-001, R-03)" "Ubuntu 24.04 LTS, 2 vCPU, 4 GB RAM" {
+                deploymentNode "Docker Compose" "Ejecuta los contenedores del MVP" "Docker 27" {
+                    containerInstance sancamilo.api
+                    containerInstance sancamilo.worker
+                    containerInstance sancamilo.bd
+                    containerInstance sancamilo.redis
+                }
+            }
+        }
+        
     }
 
     views {
@@ -82,18 +97,27 @@ workspace "San Camilo en Línea" "Modelo C4 (E1-E3, Laboratorio 06). Continuaci�
             include *
             autolayout lr
         }
+        
+        // E4: Vista Dinámica Corregida
         dynamic sancamilo.api "ConfirmarYPagar" "Dinámico: pagar con Yape un pedido de varios puestos (camino de éxito, CA-1)." {
             cliente -> sancamilo.pwa "Elige «Pagar con Yape»" "HTTPS"
             sancamilo.pwa -> sancamilo.api.pedidos "POST /pedidos/{id}/pago" "HTTPS/JSON"
             sancamilo.api.pedidos -> sancamilo.api.catalogo "Reserva el stock de cada línea"
             sancamilo.api.pedidos -> sancamilo.api.pagos "Solicita el cobro"
             sancamilo.api.pagos -> pasarela "Cobra con Yape" "HTTPS/JSON"
-            sancamilo.api.pedidos -> sancamilo.db "Guarda el pedido PAGADO y sus PedidoPuesto" "SQL/TCP"
-            sancamilo.api.notificaciones -> sancamilo.cola "Encola una notificación por puesto" "Redis protocol"
-            sancamilo.worker -> sancamilo.cola "Consume la tarea" "Redis protocol"
+            sancamilo.api.pedidos -> sancamilo.bd "Guarda el pedido PAGADO y sus PedidoPuesto" "SQL/TCP"
+            sancamilo.api.notificaciones -> sancamilo.redis "Encola una notificación por puesto" "Protocolo Redis/TCP"
+            sancamilo.worker -> sancamilo.redis "Consume la tarea" "Protocolo Redis/TCP"
             sancamilo.worker -> whatsapp "Notifica al comerciante" "HTTPS/JSON"
             autolayout lr
         }
+
+        // E5: Vista de Despliegue
+        deployment sancamilo produccion "Despliegue" "Despliegue en producción (MVP): celular, VPS y Docker Compose." {
+            include *
+            autolayout lr
+        }
+
         styles {
             element "Person" {
                 shape person
