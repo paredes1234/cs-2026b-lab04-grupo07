@@ -1,0 +1,24 @@
+@startuml contexto-manual
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Context.puml
+
+LAYOUT_WITH_LEGEND()
+
+title Diagrama de Contexto del Sistema ERP (Escrito Manualmente)
+
+Person(cliente, "Cliente / Usuario ERP", "Usuario del sistema que realiza compras, consultas de inventario y solicitudes de servicio.")
+Person(empleado, "Empleado / Usuario Interno", "Personal administrativo, contable y de ventas que gestiona operaciones del ERP.")
+
+System(sistemaERP, "Sistema ERP Multimodular", "Sistema integral para la gestión de ventas, compras, finanzas, inventarios y libros electrónicos.")
+
+System_Ext(sunat, "SUNAT / OSE", "Sistema externo de la SUNAT para validación y facturación electrónica (CPE, SIRE, RVIE).")
+System_Ext(pasarelaPago, "Pasarela de Pagos", "Servicio externo para procesamiento de pagos online (Tarjetas, Billeteras Digitales).")
+System_Ext(bancos, "Entidades Bancarias", "Sistemas bancarios externos para extracción de estados de cuenta y conciliación.")
+
+Rel(cliente, sistemaERP, "Realiza pedidos y consultas web", "HTTPS / REST API")
+Rel(empleado, sistemaERP, "Gestiona registros, libros contables y catálogos", "HTTPS / GUI")
+
+Rel(sistemaERP, sunat, "Envía comprobantes (XML) y registros tributarios", "SOAP / REST API")
+Rel(sistemaERP, pasarelaPago, "Procesa transacciones y confirma pagos", "Webhooks / HTTPS")
+Rel(sistemaERP, bancos, "Consulta extractos para conciliación bancaria", "APIs / Archivos MT940")
+
+@enduml
