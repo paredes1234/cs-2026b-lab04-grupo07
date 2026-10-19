@@ -9,7 +9,12 @@ workspace "San Camilo en Línea" "Modelo C4 (E1-E3, Laboratorio 06). Continuaci�
         repartidor = person "Repartidor" "Consulta pedidos de delivery y actualiza su entrega."
 
         sancamilo = softwareSystem "San Camilo en Línea" "Plataforma de compras del Mercado San Camilo: catálogo, pedidos multipuesto, pago y entrega." {
-
+            // E2: cada contenedor es una unidad de ejecución o un almacén; Docker NO es un contenedor C4.
+            pwa = container "Aplicación web progresiva" "Interfaz móvil para clientes, comerciantes y repartidores." "HTML/CSS/JavaScript + Service Worker" "Web Browser"
+            api = container "Aplicación web / API" "Monolito modular que procesa las operaciones del sistema mediante interfaces públicas." "Python / Django (HTTP/JSON)"
+            worker = container "Worker de notificaciones" "Ejecuta tareas asíncronas y reintentos sin bloquear el pago." "Python / Celery"
+            bd = container "Base de datos relacional" "Guarda clientes, puestos, productos, pedidos y pagos." "PostgreSQL 16" "Database"
+            redis = container "Cola y caché" "Gestiona la cola de tareas de Celery y el caché." "Redis" "Queue"
         }
 
         pasarela = softwareSystem "Pasarela de pago Yape" "Proveedor externo utilizado mediante la interfaz PasarelaPago; integración abstracta en el MVP." "Externo"
@@ -22,11 +27,26 @@ workspace "San Camilo en Línea" "Modelo C4 (E1-E3, Laboratorio 06). Continuaci�
         sancamilo -> pasarela "Solicita el cobro de pedidos con Yape"
         sancamilo -> whatsapp "Envía confirmaciones a comerciantes"
 
+        // E2: relaciones entre contenedores, con descripción y protocolo.
+        cliente -> sancamilo.pwa "Realiza sus compras" "HTTPS"
+        comerciante -> sancamilo.pwa "Gestiona su puesto" "HTTPS"
+        repartidor -> sancamilo.pwa "Consulta y actualiza entregas" "HTTPS"
+        sancamilo.pwa -> sancamilo.api "Envía solicitudes y recibe respuestas" "HTTPS/JSON"
+        sancamilo.api -> sancamilo.bd "Lee y registra datos de negocio" "SQL/TCP"
+        sancamilo.api -> sancamilo.redis "Encola notificaciones y utiliza caché" "Protocolo Redis/TCP"
+        sancamilo.worker -> sancamilo.redis "Consume tareas y registra reintentos" "Protocolo Redis/TCP"
+        sancamilo.worker -> whatsapp "Envía mensajes y confirmaciones" "HTTPS/JSON"
+        sancamilo.api -> pasarela "Solicita cobros mediante el adaptador Yape" "HTTPS/JSON"
+
 
     }
 
     views {
         systemContext sancamilo "Contexto" "Nivel 1: usuarios, San Camilo en Línea y servicios externos." {
+            include *
+            autolayout lr
+        }
+        container sancamilo "Contenedores" "Nivel 2: PWA, aplicación modular, worker, base de datos y Redis." {
             include *
             autolayout lr
         }
