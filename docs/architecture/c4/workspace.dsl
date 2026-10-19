@@ -11,7 +11,15 @@ workspace "San Camilo en Línea" "Modelo C4 (E1-E3, Laboratorio 06). Continuaci�
         sancamilo = softwareSystem "San Camilo en Línea" "Plataforma de compras del Mercado San Camilo: catálogo, pedidos multipuesto, pago y entrega." {
             // E2: cada contenedor es una unidad de ejecución o un almacén; Docker NO es un contenedor C4.
             pwa = container "Aplicación web progresiva" "Interfaz móvil para clientes, comerciantes y repartidores." "HTML/CSS/JavaScript + Service Worker" "Web Browser"
-            api = container "Aplicación web / API" "Monolito modular que procesa las operaciones del sistema mediante interfaces públicas." "Python / Django (HTTP/JSON)"
+            api = container "Aplicación web / API" "Monolito modular que procesa las operaciones del sistema mediante interfaces públicas." "Python / Django (HTTP/JSON)" {
+                // E3: componentes alineados con docs/design/paquetes.puml, no con el caso AgroConecta.
+                catalogo = component "Catálogo" "Gestiona puestos, productos, disponibilidad y stock." "Módulo Python/Django"
+                pedidos = component "Pedidos" "Carrito, pago de pedido multipuesto, Pedido y PedidoPuesto; dueño del puerto Notificador." "Módulo Python/Django"
+                pagos = component "Pagos" "Gestiona cobros mediante la interfaz PasarelaPago y el adaptador Yape." "Módulo Python/Django"
+                notificaciones = component "Notificaciones" "Implementa Notificador y coordina el envío de avisos al comerciante." "Módulo Python/Django"
+                entrega = component "Entrega" "Gestiona recojo, delivery y actualización del estado de PedidoPuesto." "Módulo Python/Django"
+                compartido = component "Compartido" "Tipos, identificadores y utilidades sin dependencias de los módulos de negocio." "Módulo Python/Django"
+            }
             worker = container "Worker de notificaciones" "Ejecuta tareas asíncronas y reintentos sin bloquear el pago." "Python / Celery"
             bd = container "Base de datos relacional" "Guarda clientes, puestos, productos, pedidos y pagos." "PostgreSQL 16" "Database"
             redis = container "Cola y caché" "Gestiona la cola de tareas de Celery y el caché." "Redis" "Queue"
@@ -38,7 +46,27 @@ workspace "San Camilo en Línea" "Modelo C4 (E1-E3, Laboratorio 06). Continuaci�
         sancamilo.worker -> whatsapp "Envía mensajes y confirmaciones" "HTTPS/JSON"
         sancamilo.api -> pasarela "Solicita cobros mediante el adaptador Yape" "HTTPS/JSON"
 
+        // E3: llamadas hacia componentes desde la PWA.
+        sancamilo.pwa -> sancamilo.api.catalogo "Consulta productos y puestos" "HTTPS/JSON"
+        sancamilo.pwa -> sancamilo.api.pedidos "Confirma y paga pedidos" "HTTPS/JSON"
+        sancamilo.pwa -> sancamilo.api.entrega "Consulta estado de recojo o delivery" "HTTPS/JSON"
 
+        // E3: dependencias de paquetes según Lab 05, sin ciclos.
+        sancamilo.api.pedidos -> sancamilo.api.catalogo "Consulta productos, reserva y libera stock" "Llamada interna Python"
+        sancamilo.api.pedidos -> sancamilo.api.pagos "Solicita y registra el cobro" "Llamada interna Python"
+        sancamilo.api.notificaciones -> sancamilo.api.pedidos "Implementa el puerto Notificador y usa PedidoPuesto" "Interfaz Python"
+        sancamilo.api.entrega -> sancamilo.api.pedidos "Consulta PedidoPuesto y registra recojo o entrega" "Llamada interna Python"
+        sancamilo.api.catalogo -> sancamilo.api.compartido "Utiliza tipos compartidos" "Python"
+        sancamilo.api.pedidos -> sancamilo.api.compartido "Utiliza tipos compartidos" "Python"
+        sancamilo.api.pagos -> sancamilo.api.compartido "Utiliza tipos compartidos" "Python"
+        sancamilo.api.notificaciones -> sancamilo.api.compartido "Utiliza tipos compartidos" "Python"
+        sancamilo.api.entrega -> sancamilo.api.compartido "Utiliza tipos compartidos" "Python"
+        sancamilo.api.pagos -> pasarela "Invoca cobrar() mediante PasarelaPago" "HTTPS/JSON"
+        sancamilo.api.pedidos -> sancamilo.redis "Encola confirmaciones tras guardar el pedido" "Protocolo Redis/TCP"
+        sancamilo.worker -> sancamilo.api.notificaciones "Ejecuta tareas del módulo Notificaciones" "Celery/Python"
+        sancamilo.api.notificaciones -> whatsapp "Envía notificaciones del pedido" "HTTPS/JSON"
+        sancamilo.api.catalogo -> sancamilo.bd "Lee productos y stock" "SQL/TCP"
+        sancamilo.api.pedidos -> sancamilo.bd "Guarda pedidos y estados" "SQL/TCP"
     }
 
     views {
@@ -47,6 +75,10 @@ workspace "San Camilo en Línea" "Modelo C4 (E1-E3, Laboratorio 06). Continuaci�
             autolayout lr
         }
         container sancamilo "Contenedores" "Nivel 2: PWA, aplicación modular, worker, base de datos y Redis." {
+            include *
+            autolayout lr
+        }
+        component sancamilo.api "Componentes" "Nivel 3: componentes internos de la API, alineados con paquetes.puml (Lab 05)." {
             include *
             autolayout lr
         }
