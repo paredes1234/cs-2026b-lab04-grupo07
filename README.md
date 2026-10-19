@@ -108,10 +108,12 @@ La IA propone, pero el equipo decide y verifica.
 
 ## Arquitectura C4 (Lab 06)
 
-Modelamos la arquitectura de San Camilo en Línea con el modelo C4, en cinco vistas: contexto, contenedores, componentes, dinámica (ConfirmarYPagar) y despliegue.
-La fuente única es [`docs/architecture/c4/workspace.dsl`](docs/architecture/c4/workspace.dsl) (Structurizr DSL). Las exportaciones de `export/` y las imágenes de `img/` se generan desde ese archivo.
+Modelamos la arquitectura de San Camilo en Línea con el modelo C4 en cinco vistas: contexto, contenedores, componentes, dinámica (ConfirmarYPagar) y despliegue.
+Todas salen de un solo modelo, [`docs/architecture/c4/workspace.dsl`](docs/architecture/c4/workspace.dsl) (Structurizr DSL). Las exportaciones de `export/` y las imágenes de `img/` se generan desde ese archivo.
 
 ### Diagrama de contexto (Mermaid, copiado de `export/Contexto.mmd`)
+
+> Nota: según la Tabla 4 de la guía, GitHub renderiza la sintaxis Mermaid C4 de forma experimental. Structurizr CLI exporta Mermaid como diagrama de flujo (`graph LR`), no con la sintaxis `C4Context`, y sin leyenda. Para ver la notación completa con leyenda, usar las imágenes PNG de abajo.
 
 ```mermaid
 graph LR
@@ -142,7 +144,7 @@ graph LR
   end
 ```
 
-### Vistas
+### Vistas (PNG exportados con C4-PlantUML)
 
 - [Contexto (nivel 1)](docs/architecture/c4/img/Contexto.png)
 - [Contenedores (nivel 2)](docs/architecture/c4/img/Contenedores.png)
@@ -155,6 +157,6 @@ graph LR
 - [Modelo: `workspace.dsl`](docs/architecture/c4/workspace.dsl)
 - [Inventario de elementos (E1)](docs/architecture/c4/inventario.md)
 - [Comparaciones (E4 y E6)](docs/architecture/c4/comparacion.md)
-- [Revisión C4 (E7)](docs/architecture/c4/revision-c4.md)
-- [Explicación de la arquitectura (E7)](docs/architecture/c4/explicacion.md)
+- [Revisión C4 con la lista oficial (E7)](docs/architecture/c4/revision-c4.md)
+- [Explicación para público no técnico (E7)](docs/architecture/c4/explicacion.md)
 - [Bitácora de IA (Lab 06)](docs/architecture/c4/bitacora-ia.md)
