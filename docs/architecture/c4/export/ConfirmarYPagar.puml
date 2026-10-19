@@ -1,19 +1,57 @@
 @startuml
-!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+title <size:24>Dynamic View: San Camilo en Línea - Aplicación web / API</size>\n<size:24>Dinámico: pagar con Yape un pedido de varios puestos (camino de éxito, CA-1).</size>
 
-LAYOUT_WITH_LEGEND()
+set separator none
+left to right direction
 
-title Dynamic diagram - Flujo Confirmar y Pagar
+<style>
+  root {
+    BackgroundColor: #ffffff
+    FontColor: #444444
+  }
+</style>
 
-Person(cliente, "Cliente Web")
-Component(checkout, "Checkout Component", "React")
-Component(paymentController, "Payment Controller", "API")
-Component(pasarelaExt, "Pasarela Externa", "API Rest")
-Component(cpeEngine, "CPE Engine", "Service")
+!include <C4/C4>
+!include <C4/C4_Context>
+!include <C4/C4_Container>
+!include <C4/C4_Component>
 
-Rel(cliente, checkout, "1. Hace clic en Confirmar y Pagar")
-Rel(checkout, paymentController, "2. Envía solicitud de pago")
-Rel(paymentController, pasarelaExt, "3. Procesa cobro")
-Rel(pasarelaExt, paymentController, "4. Retorna respuesta/Webhook")
-Rel(paymentController, cpeEngine, "5. Solicita emisión de comprobante")
+Person(Cliente, "Cliente", $descr="Consulta productos, compra en varios puestos y paga un pedido único.", $tags="", $link="")
+
+System(PasareladepagoYape, "Pasarela de pago Yape", $descr="Proveedor externo utilizado mediante la interfaz PasarelaPago; integración abstracta en el MVP.", $tags="", $link="")
+System(ServiciodeWhatsApp, "Servicio de WhatsApp", $descr="Servicio externo al que se envían las confirmaciones y notificaciones.", $tags="", $link="")
+
+System_Boundary("SanCamiloenLínea_boundary", "San Camilo en Línea", $tags="") {
+  Container_Boundary("SanCamiloenLínea.AplicaciónwebAPI_boundary", "Aplicación web / API", $tags="") {
+    Component(SanCamiloenLínea.AplicaciónwebAPI.Catálogo, "Catálogo", $techn="Módulo Python/Django", $descr="Gestiona puestos, productos, disponibilidad y stock.", $tags="", $link="")
+    Component(SanCamiloenLínea.AplicaciónwebAPI.Pedidos, "Pedidos", $techn="Módulo Python/Django", $descr="Carrito, pago de pedido multipuesto, Pedido y PedidoPuesto; dueño del puerto Notificador.", $tags="", $link="")
+    Component(SanCamiloenLínea.AplicaciónwebAPI.Pagos, "Pagos", $techn="Módulo Python/Django", $descr="Gestiona cobros mediante la interfaz PasarelaPago y el adaptador Yape.", $tags="", $link="")
+  }
+
+  Container(SanCamiloenLínea.Workerdenotificaciones, "Worker de notificaciones", $techn="Python / Celery", $descr="Ejecuta tareas asíncronas y reintentos sin bloquear el pago.", $tags="", $link="")
+  ContainerDb(SanCamiloenLínea.Basededatosrelacional, "Base de datos relacional", $techn="PostgreSQL 16", $descr="Guarda clientes, puestos, productos, pedidos y pagos.", $tags="", $link="")
+  ContainerQueue(SanCamiloenLínea.Colaycaché, "Cola y caché", $techn="Redis", $descr="Gestiona la cola de tareas de Celery y el caché.", $tags="", $link="")
+  Container(SanCamiloenLínea.Aplicaciónwebprogresiva, "Aplicación web progresiva", $techn="HTML/CSS/JavaScript + Service Worker", $descr="Interfaz móvil para clientes, comerciantes y repartidores.", $tags="", $link="")
+}
+
+Person(Cliente, "Cliente", $descr="Consulta productos, compra en varios puestos y paga un pedido único.", $tags="", $link="")
+Container(SanCamiloenLínea.Aplicaciónwebprogresiva, "Aplicación web progresiva", $techn="HTML/CSS/JavaScript + Service Worker", $descr="Interfaz móvil para clientes, comerciantes y repartidores.", $tags="", $link="")
+Container(SanCamiloenLínea.Workerdenotificaciones, "Worker de notificaciones", $techn="Python / Celery", $descr="Ejecuta tareas asíncronas y reintentos sin bloquear el pago.", $tags="", $link="")
+ContainerDb(SanCamiloenLínea.Basededatosrelacional, "Base de datos relacional", $techn="PostgreSQL 16", $descr="Guarda clientes, puestos, productos, pedidos y pagos.", $tags="", $link="")
+ContainerQueue(SanCamiloenLínea.Colaycaché, "Cola y caché", $techn="Redis", $descr="Gestiona la cola de tareas de Celery y el caché.", $tags="", $link="")
+System(PasareladepagoYape, "Pasarela de pago Yape", $descr="Proveedor externo utilizado mediante la interfaz PasarelaPago; integración abstracta en el MVP.", $tags="", $link="")
+System(ServiciodeWhatsApp, "Servicio de WhatsApp", $descr="Servicio externo al que se envían las confirmaciones y notificaciones.", $tags="", $link="")
+
+Rel(Cliente, SanCamiloenLínea.Aplicaciónwebprogresiva, "1: Elige «Pagar con Yape»", $techn="HTTPS", $tags="", $link="")
+Rel(SanCamiloenLínea.Aplicaciónwebprogresiva, SanCamiloenLínea.AplicaciónwebAPI.Pedidos, "2: POST /pedidos/{id}/pago", $techn="HTTPS/JSON", $tags="", $link="")
+Rel(SanCamiloenLínea.AplicaciónwebAPI.Pedidos, SanCamiloenLínea.AplicaciónwebAPI.Catálogo, "3: Reserva el stock de cada línea", $techn="Llamada interna Python", $tags="", $link="")
+Rel(SanCamiloenLínea.AplicaciónwebAPI.Pedidos, SanCamiloenLínea.AplicaciónwebAPI.Pagos, "4: Solicita el cobro", $techn="Llamada interna Python", $tags="", $link="")
+Rel(SanCamiloenLínea.AplicaciónwebAPI.Pagos, PasareladepagoYape, "5: Cobra con Yape", $techn="HTTPS/JSON", $tags="", $link="")
+Rel(SanCamiloenLínea.AplicaciónwebAPI.Pedidos, SanCamiloenLínea.Basededatosrelacional, "6: Guarda el pedido PAGADO y sus PedidoPuesto", $techn="SQL/TCP", $tags="", $link="")
+Rel(SanCamiloenLínea.AplicaciónwebAPI.Pedidos, SanCamiloenLínea.Colaycaché, "7: Encola una notificación por puesto", $techn="Protocolo Redis/TCP", $tags="", $link="")
+Rel(SanCamiloenLínea.Workerdenotificaciones, SanCamiloenLínea.Colaycaché, "8: Consume la tarea", $techn="Protocolo Redis/TCP", $tags="", $link="")
+Rel(SanCamiloenLínea.Workerdenotificaciones, ServiciodeWhatsApp, "9: Notifica al comerciante", $techn="HTTPS/JSON", $tags="", $link="")
+
+SHOW_LEGEND(true)
+hide stereotypes
 @enduml

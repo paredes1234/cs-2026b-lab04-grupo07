@@ -1,18 +1,41 @@
 @startuml
-!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Deployment.puml
+title <size:24>Deployment View: San Camilo en Línea - Producción</size>\n<size:24>Despliegue en producción (MVP): celular, VPS y Docker Compose.</size>
 
-LAYOUT_WITH_LEGEND()
+set separator none
+left to right direction
 
-title Deployment Diagram - Cloud AWS
+<style>
+  root {
+    BackgroundColor: #ffffff
+    FontColor: #444444
+  }
+</style>
 
-Deployment_Node(aws, "Amazon Web Services (AWS)", "Cloud"){
-    Deployment_Node(ecs, "Amazon ECS", "Docker Containers"){
-        Container(app, "Web App & APIs", "Docker")
-    }
-    Deployment_Node(rds, "Amazon RDS", "Database Node"){
-        ContainerDb(db, "PostgreSQL Database", "PostgreSQL 15")
-    }
+!include <C4/C4>
+!include <C4/C4_Context>
+!include <C4/C4_Container>
+!include <C4/C4_Deployment>
+
+Deployment_Node(Producción.Celulardelusuario, "Celular del usuario", $type="Android + Chrome", $descr="Dispositivo de gama baja (R-05)", $tags="", $link="") {
+  Container(Producción.Celulardelusuario.Aplicaciónwebprogresiva_1, "Aplicación web progresiva", $techn="HTML/CSS/JavaScript + Service Worker", $descr="Interfaz móvil para clientes, comerciantes y repartidores.", $tags="", $link="")
 }
 
-Rel(app, db, "Conecta via TCP/5432")
+Deployment_Node(Producción.ServidorVPSenlanube, "Servidor VPS en la nube", $type="Ubuntu 24.04 LTS, 2 vCPU, 4 GB RAM", $descr="Un único servidor para el MVP (ADR-001, R-03)", $tags="", $link="") {
+  Deployment_Node(Producción.ServidorVPSenlanube.DockerCompose, "Docker Compose", $type="Docker 27", $descr="Ejecuta los contenedores del MVP", $tags="", $link="") {
+    Container(Producción.ServidorVPSenlanube.DockerCompose.AplicaciónwebAPI_1, "Aplicación web / API", $techn="Python / Django (HTTP/JSON)", $descr="Monolito modular que procesa las operaciones del sistema mediante interfaces públicas.", $tags="", $link="")
+    Container(Producción.ServidorVPSenlanube.DockerCompose.Workerdenotificaciones_1, "Worker de notificaciones", $techn="Python / Celery", $descr="Ejecuta tareas asíncronas y reintentos sin bloquear el pago.", $tags="", $link="")
+    ContainerDb(Producción.ServidorVPSenlanube.DockerCompose.Basededatosrelacional_1, "Base de datos relacional", $techn="PostgreSQL 16", $descr="Guarda clientes, puestos, productos, pedidos y pagos.", $tags="", $link="")
+    ContainerQueue(Producción.ServidorVPSenlanube.DockerCompose.Colaycaché_1, "Cola y caché", $techn="Redis", $descr="Gestiona la cola de tareas de Celery y el caché.", $tags="", $link="")
+  }
+
+}
+
+Rel(Producción.Celulardelusuario.Aplicaciónwebprogresiva_1, Producción.ServidorVPSenlanube.DockerCompose.AplicaciónwebAPI_1, "Envía solicitudes y recibe respuestas", $techn="HTTPS/JSON", $tags="", $link="")
+Rel(Producción.ServidorVPSenlanube.DockerCompose.Workerdenotificaciones_1, Producción.ServidorVPSenlanube.DockerCompose.AplicaciónwebAPI_1, "Ejecuta tareas del módulo Notificaciones", $techn="Celery/Python", $tags="", $link="")
+Rel(Producción.ServidorVPSenlanube.DockerCompose.AplicaciónwebAPI_1, Producción.ServidorVPSenlanube.DockerCompose.Basededatosrelacional_1, "Lee y registra datos de negocio", $techn="SQL/TCP", $tags="", $link="")
+Rel(Producción.ServidorVPSenlanube.DockerCompose.AplicaciónwebAPI_1, Producción.ServidorVPSenlanube.DockerCompose.Colaycaché_1, "Encola notificaciones y utiliza caché", $techn="Protocolo Redis/TCP", $tags="", $link="")
+Rel(Producción.ServidorVPSenlanube.DockerCompose.Workerdenotificaciones_1, Producción.ServidorVPSenlanube.DockerCompose.Colaycaché_1, "Consume tareas y registra reintentos", $techn="Protocolo Redis/TCP", $tags="", $link="")
+
+SHOW_LEGEND(true)
+hide stereotypes
 @enduml

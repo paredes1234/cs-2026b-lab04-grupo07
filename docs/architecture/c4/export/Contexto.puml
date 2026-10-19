@@ -1,22 +1,32 @@
 @startuml
-!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Context.puml
+title <size:24>System Context View: San Camilo en Línea</size>\n<size:24>Nivel 1: usuarios, San Camilo en Línea y servicios externos.</size>
 
-LAYOUT_WITH_LEGEND()
+set separator none
+left to right direction
 
-title System Context diagram for Sistema ERP Multimodular
+<style>
+  root {
+    BackgroundColor: #ffffff
+    FontColor: #444444
+  }
+</style>
 
-Person(cliente, "Cliente / Usuario ERP", "Usuario que realiza pedidos y consultas.")
-Person(empleado, "Empleado Interno", "Personal de ventas, compras y contabilidad.")
+!include <C4/C4>
+!include <C4/C4_Context>
 
-System(sistemaERP, "Sistema ERP Multimodular", "ERP para la gestión de ventas, compras, finanzas y libros electrónicas.")
+Person(Cliente, "Cliente", $descr="Consulta productos, compra en varios puestos y paga un pedido único.", $tags="", $link="")
+System(PasareladepagoYape, "Pasarela de pago Yape", $descr="Proveedor externo utilizado mediante la interfaz PasarelaPago; integración abstracta en el MVP.", $tags="", $link="")
+System(ServiciodeWhatsApp, "Servicio de WhatsApp", $descr="Servicio externo al que se envían las confirmaciones y notificaciones.", $tags="", $link="")
+Person(Comerciante, "Comerciante", $descr="Administra productos y prepara los pedidos de su puesto.", $tags="", $link="")
+Person(Repartidor, "Repartidor", $descr="Consulta pedidos de delivery y actualiza su entrega.", $tags="", $link="")
+System(SanCamiloenLínea, "San Camilo en Línea", $descr="Plataforma de compras del Mercado San Camilo: catálogo, pedidos multipuesto, pago y entrega.", $tags="", $link="")
 
-System_Ext(sunat, "SUNAT / OSE", "Validación y emisión de comprobantes de pago electrónicos.")
-System_Ext(pasarela, "Pasarela de Pagos", "Procesamiento de pagos en línea.")
-System_Ext(bancos, "Entidades Bancarias", "Extractos para conciliación bancaria.")
+Rel(Cliente, SanCamiloenLínea, "Consulta el catálogo, realiza pedidos multipuesto y paga", $techn="", $tags="", $link="")
+Rel(Comerciante, SanCamiloenLínea, "Publica productos y atiende pedidos", $techn="", $tags="", $link="")
+Rel(Repartidor, SanCamiloenLínea, "Consulta entregas asignadas y actualiza su estado", $techn="", $tags="", $link="")
+Rel(SanCamiloenLínea, PasareladepagoYape, "Solicita el cobro de pedidos con Yape", $techn="", $tags="", $link="")
+Rel(SanCamiloenLínea, ServiciodeWhatsApp, "Envía confirmaciones a comerciantes", $techn="", $tags="", $link="")
 
-Rel(cliente, sistemaERP, "Usa")
-Rel(empleado, sistemaERP, "Usa")
-Rel(sistemaERP, sunat, "Envía CPE / SIRE")
-Rel(sistemaERP, pasarela, "Procesa pagos")
-Rel(sistemaERP, bancos, "Consulta extractos")
+SHOW_LEGEND(true)
+hide stereotypes
 @enduml

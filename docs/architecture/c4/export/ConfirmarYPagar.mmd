@@ -1,6 +1,64 @@
-graph TD
-    cliente["Cliente Web"] -->|1. Confirmar y Pagar| checkout["Checkout Component"]
-    checkout -->|2. Solicitud de pago| paymentController["Payment Controller"]
-    paymentController -->|3. Procesa cobro| pasarelaExt["Pasarela Externa"]
-    pasarelaExt -->|4. Retorna estado| paymentController
-    paymentController -->|5. Solicita emisión CPE| cpeEngine["CPE Engine"]
+graph LR
+  linkStyle default fill:#ffffff
+
+  subgraph diagram ["Dynamic View: San Camilo en Línea - Aplicación web / API"]
+    style diagram fill:#ffffff,stroke:#ffffff
+
+    1["<div style='font-weight: bold'>Cliente</div><div style='font-size: 70%; margin-top: 0px'>[Person]</div><div style='font-size: 80%; margin-top:10px'>Consulta productos, compra en<br />varios puestos y paga un<br />pedido único.</div>"]
+    style 1 fill:#08427b,stroke:#052e56,color:#ffffff
+
+    16["<div style='font-weight: bold'>Pasarela de pago Yape</div><div style='font-size: 70%; margin-top: 0px'>[Software System]</div><div style='font-size: 80%; margin-top:10px'>Proveedor externo utilizado<br />mediante la interfaz<br />PasarelaPago; integración<br />abstracta en el MVP.</div>"]
+    style 16 fill:#737a86,stroke:#50555d,color:#ffffff
+    17["<div style='font-weight: bold'>Servicio de WhatsApp</div><div style='font-size: 70%; margin-top: 0px'>[Software System]</div><div style='font-size: 80%; margin-top:10px'>Servicio externo al que se<br />envían las confirmaciones y<br />notificaciones.</div>"]
+    style 17 fill:#737a86,stroke:#50555d,color:#ffffff
+
+    subgraph 4 ["San Camilo en Línea"]
+      style 4 fill:#ffffff,stroke:#0b4884,color:#0b4884
+
+      subgraph 6 ["Aplicación web / API"]
+        style 6 fill:#ffffff,stroke:#2e6295,color:#2e6295
+
+        7["<div style='font-weight: bold'>Catálogo</div><div style='font-size: 70%; margin-top: 0px'>[Component: Módulo Python/Django]</div><div style='font-size: 80%; margin-top:10px'>Gestiona puestos, productos,<br />disponibilidad y stock.</div>"]
+        style 7 fill:#85bbf0,stroke:#5d82a8,color:#172334
+        8["<div style='font-weight: bold'>Pedidos</div><div style='font-size: 70%; margin-top: 0px'>[Component: Módulo Python/Django]</div><div style='font-size: 80%; margin-top:10px'>Carrito, pago de pedido<br />multipuesto, Pedido y<br />PedidoPuesto; dueño del<br />puerto Notificador.</div>"]
+        style 8 fill:#85bbf0,stroke:#5d82a8,color:#172334
+        9["<div style='font-weight: bold'>Pagos</div><div style='font-size: 70%; margin-top: 0px'>[Component: Módulo Python/Django]</div><div style='font-size: 80%; margin-top:10px'>Gestiona cobros mediante la<br />interfaz PasarelaPago y el<br />adaptador Yape.</div>"]
+        style 9 fill:#85bbf0,stroke:#5d82a8,color:#172334
+      end
+
+      13["<div style='font-weight: bold'>Worker de notificaciones</div><div style='font-size: 70%; margin-top: 0px'>[Container: Python / Celery]</div><div style='font-size: 80%; margin-top:10px'>Ejecuta tareas asíncronas y<br />reintentos sin bloquear el<br />pago.</div>"]
+      style 13 fill:#438dd5,stroke:#2e6295,color:#ffffff
+      14[("<div style='font-weight: bold'>Base de datos relacional</div><div style='font-size: 70%; margin-top: 0px'>[Container: PostgreSQL 16]</div><div style='font-size: 80%; margin-top:10px'>Guarda clientes, puestos,<br />productos, pedidos y pagos.</div>")]
+      style 14 fill:#438dd5,stroke:#2e6295,color:#ffffff
+      15["<div style='font-weight: bold'>Cola y caché</div><div style='font-size: 70%; margin-top: 0px'>[Container: Redis]</div><div style='font-size: 80%; margin-top:10px'>Gestiona la cola de tareas de<br />Celery y el caché.</div>"]
+      style 15 fill:#438dd5,stroke:#2e6295,color:#ffffff
+      5["<div style='font-weight: bold'>Aplicación web progresiva</div><div style='font-size: 70%; margin-top: 0px'>[Container: HTML/CSS/JavaScript + Service Worker]</div><div style='font-size: 80%; margin-top:10px'>Interfaz móvil para clientes,<br />comerciantes y repartidores.</div>"]
+      style 5 fill:#438dd5,stroke:#2e6295,color:#ffffff
+    end
+
+    1["<div style='font-weight: bold'>Cliente</div><div style='font-size: 70%; margin-top: 0px'>[Person]</div><div style='font-size: 80%; margin-top:10px'>Consulta productos, compra en<br />varios puestos y paga un<br />pedido único.</div>"]
+    style 1 fill:#08427b,stroke:#052e56,color:#ffffff
+    5["<div style='font-weight: bold'>Aplicación web progresiva</div><div style='font-size: 70%; margin-top: 0px'>[Container: HTML/CSS/JavaScript + Service Worker]</div><div style='font-size: 80%; margin-top:10px'>Interfaz móvil para clientes,<br />comerciantes y repartidores.</div>"]
+    style 5 fill:#438dd5,stroke:#2e6295,color:#ffffff
+    13["<div style='font-weight: bold'>Worker de notificaciones</div><div style='font-size: 70%; margin-top: 0px'>[Container: Python / Celery]</div><div style='font-size: 80%; margin-top:10px'>Ejecuta tareas asíncronas y<br />reintentos sin bloquear el<br />pago.</div>"]
+    style 13 fill:#438dd5,stroke:#2e6295,color:#ffffff
+    14[("<div style='font-weight: bold'>Base de datos relacional</div><div style='font-size: 70%; margin-top: 0px'>[Container: PostgreSQL 16]</div><div style='font-size: 80%; margin-top:10px'>Guarda clientes, puestos,<br />productos, pedidos y pagos.</div>")]
+    style 14 fill:#438dd5,stroke:#2e6295,color:#ffffff
+    15["<div style='font-weight: bold'>Cola y caché</div><div style='font-size: 70%; margin-top: 0px'>[Container: Redis]</div><div style='font-size: 80%; margin-top:10px'>Gestiona la cola de tareas de<br />Celery y el caché.</div>"]
+    style 15 fill:#438dd5,stroke:#2e6295,color:#ffffff
+    16["<div style='font-weight: bold'>Pasarela de pago Yape</div><div style='font-size: 70%; margin-top: 0px'>[Software System]</div><div style='font-size: 80%; margin-top:10px'>Proveedor externo utilizado<br />mediante la interfaz<br />PasarelaPago; integración<br />abstracta en el MVP.</div>"]
+    style 16 fill:#737a86,stroke:#50555d,color:#ffffff
+    17["<div style='font-weight: bold'>Servicio de WhatsApp</div><div style='font-size: 70%; margin-top: 0px'>[Software System]</div><div style='font-size: 80%; margin-top:10px'>Servicio externo al que se<br />envían las confirmaciones y<br />notificaciones.</div>"]
+    style 17 fill:#737a86,stroke:#50555d,color:#ffffff
+
+    1-. "<div>1. Elige «Pagar con Yape»</div><div style='font-size: 70%'>[HTTPS]</div>" .->5
+    5-. "<div>2. POST /pedidos/{id}/pago</div><div style='font-size: 70%'>[HTTPS/JSON]</div>" .->8
+    8-. "<div>3. Reserva el stock de cada<br />línea</div><div style='font-size: 70%'>[Llamada interna Python]</div>" .->7
+    8-. "<div>4. Solicita el cobro</div><div style='font-size: 70%'>[Llamada interna Python]</div>" .->9
+    9-. "<div>5. Cobra con Yape</div><div style='font-size: 70%'>[HTTPS/JSON]</div>" .->16
+    8-. "<div>6. Guarda el pedido PAGADO y<br />sus PedidoPuesto</div><div style='font-size: 70%'>[SQL/TCP]</div>" .->14
+    8-. "<div>7. Encola una notificación<br />por puesto</div><div style='font-size: 70%'>[Protocolo Redis/TCP]</div>" .->15
+    13-. "<div>8. Consume la tarea</div><div style='font-size: 70%'>[Protocolo Redis/TCP]</div>" .->15
+    13-. "<div>9. Notifica al comerciante</div><div style='font-size: 70%'>[HTTPS/JSON]</div>" .->17
+
+  end

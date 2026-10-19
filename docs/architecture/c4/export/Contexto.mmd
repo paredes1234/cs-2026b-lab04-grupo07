@@ -1,6 +1,26 @@
-graph TD
-    cliente["Cliente / Usuario ERP"] -->|Usa| sistemaERP["Sistema ERP Multimodular"]
-    empleado["Empleado Interno"] -->|Usa| sistemaERP
-    sistemaERP -->|Envía CPE / SIRE| sunat["SUNAT / OSE"]
-    sistemaERP -->|Procesa pagos| pasarela["Pasarela de Pagos"]
-    sistemaERP -->|Consulta extractos| bancos["Entidades Bancarias"]
+graph LR
+  linkStyle default fill:#ffffff
+
+  subgraph diagram ["System Context View: San Camilo en Línea"]
+    style diagram fill:#ffffff,stroke:#ffffff
+
+    1["<div style='font-weight: bold'>Cliente</div><div style='font-size: 70%; margin-top: 0px'>[Person]</div><div style='font-size: 80%; margin-top:10px'>Consulta productos, compra en<br />varios puestos y paga un<br />pedido único.</div>"]
+    style 1 fill:#08427b,stroke:#052e56,color:#ffffff
+    16["<div style='font-weight: bold'>Pasarela de pago Yape</div><div style='font-size: 70%; margin-top: 0px'>[Software System]</div><div style='font-size: 80%; margin-top:10px'>Proveedor externo utilizado<br />mediante la interfaz<br />PasarelaPago; integración<br />abstracta en el MVP.</div>"]
+    style 16 fill:#737a86,stroke:#50555d,color:#ffffff
+    17["<div style='font-weight: bold'>Servicio de WhatsApp</div><div style='font-size: 70%; margin-top: 0px'>[Software System]</div><div style='font-size: 80%; margin-top:10px'>Servicio externo al que se<br />envían las confirmaciones y<br />notificaciones.</div>"]
+    style 17 fill:#737a86,stroke:#50555d,color:#ffffff
+    2["<div style='font-weight: bold'>Comerciante</div><div style='font-size: 70%; margin-top: 0px'>[Person]</div><div style='font-size: 80%; margin-top:10px'>Administra productos y<br />prepara los pedidos de su<br />puesto.</div>"]
+    style 2 fill:#08427b,stroke:#052e56,color:#ffffff
+    3["<div style='font-weight: bold'>Repartidor</div><div style='font-size: 70%; margin-top: 0px'>[Person]</div><div style='font-size: 80%; margin-top:10px'>Consulta pedidos de delivery<br />y actualiza su entrega.</div>"]
+    style 3 fill:#08427b,stroke:#052e56,color:#ffffff
+    4["<div style='font-weight: bold'>San Camilo en Línea</div><div style='font-size: 70%; margin-top: 0px'>[Software System]</div><div style='font-size: 80%; margin-top:10px'>Plataforma de compras del<br />Mercado San Camilo: catálogo,<br />pedidos multipuesto, pago y<br />entrega.</div>"]
+    style 4 fill:#1168bd,stroke:#0b4884,color:#ffffff
+
+    1-. "<div>Consulta el catálogo, realiza<br />pedidos multipuesto y paga</div><div style='font-size: 70%'></div>" .->4
+    2-. "<div>Publica productos y atiende<br />pedidos</div><div style='font-size: 70%'></div>" .->4
+    3-. "<div>Consulta entregas asignadas y<br />actualiza su estado</div><div style='font-size: 70%'></div>" .->4
+    4-. "<div>Solicita el cobro de pedidos<br />con Yape</div><div style='font-size: 70%'></div>" .->16
+    4-. "<div>Envía confirmaciones a<br />comerciantes</div><div style='font-size: 70%'></div>" .->17
+
+  end
