@@ -1,0 +1,5 @@
+# Comparación — San Camilo en Línea (Lab 06)
+
+## E4. Vista dinámica de C4 frente al diagrama de secuencia UML (Lab 05)
+
+La secuencia UML del Lab 05 muestra 32 mensajes entre 9 líneas de vida (Cliente, PWA, PedidoController, ServicioPedidos, RepositorioPedidos, Pedido, Producto, PasarelaPago y Notificador), con el nombre y los parámetros de cada operación (confirmarYPagar, registrarPago, dividirPorPuesto, guardar), los fragmentos alt y loop, la transacción "todo o nada", el mensaje asíncrono al Notificador, los retornos (201 / 402) y la rama de error CA-2. La vista dinámica omite todo ese detalle: solo muestra 9 pasos numerados del camino de éxito entre contenedores y módulos, con su protocolo, sin ramas, retornos ni clases. La secuencia UML sirve a los developers que implementan y prueban el flujo. La vista dinámica sirve al docente, a los arquitectos y al equipo técnico para entender qué piezas intervienen y en qué orden, sin leer código.

@@ -82,6 +82,18 @@ workspace "San Camilo en Línea" "Modelo C4 (E1-E3, Laboratorio 06). Continuaci�
             include *
             autolayout lr
         }
+        dynamic sancamilo.api "ConfirmarYPagar" "Dinámico: pagar con Yape un pedido de varios puestos (camino de éxito, CA-1)." {
+            cliente -> sancamilo.pwa "Elige «Pagar con Yape»" "HTTPS"
+            sancamilo.pwa -> sancamilo.api.pedidos "POST /pedidos/{id}/pago" "HTTPS/JSON"
+            sancamilo.api.pedidos -> sancamilo.api.catalogo "Reserva el stock de cada línea"
+            sancamilo.api.pedidos -> sancamilo.api.pagos "Solicita el cobro"
+            sancamilo.api.pagos -> pasarela "Cobra con Yape" "HTTPS/JSON"
+            sancamilo.api.pedidos -> sancamilo.db "Guarda el pedido PAGADO y sus PedidoPuesto" "SQL/TCP"
+            sancamilo.api.notificaciones -> sancamilo.cola "Encola una notificación por puesto" "Redis protocol"
+            sancamilo.worker -> sancamilo.cola "Consume la tarea" "Redis protocol"
+            sancamilo.worker -> whatsapp "Notifica al comerciante" "HTTPS/JSON"
+            autolayout lr
+        }
         styles {
             element "Person" {
                 shape person
