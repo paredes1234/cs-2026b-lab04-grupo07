@@ -1,0 +1,24 @@
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+LAYOUT_WITH_LEGEND()
+
+title Component diagram for Servicio de Ventas e Ingresos
+
+Container(apiGateway, "API Gateway", "Node.js", "Enrutador principal")
+
+Container_Boundary(ventasBoundary, "Servicio de Ventas e Ingresos") {
+    Component(ordersController, "Orders Controller", "FastAPI", "Recibe peticiones HTTP de pedidos")
+    Component(orderEngine, "Order Engine", "Python Domain", "Procesa lógica de checkout y precios")
+    Component(sunatValidator, "Validador SUNAT", "Python", "Valida RUC/DNI y afección de IGV")
+    Component(repo, "Order Repository", "SQLAlchemy", "Acceso a datos de pedidos")
+}
+
+ContainerDb(database, "PostgreSQL", "BD", "Base de datos")
+
+Rel(apiGateway, ordersController, "HTTP REST")
+Rel(ordersController, orderEngine, "Usa")
+Rel(orderEngine, sunatValidator, "Valida datos tributarios")
+Rel(orderEngine, repo, "Guarda estado")
+Rel(repo, database, "SQL")
+@enduml

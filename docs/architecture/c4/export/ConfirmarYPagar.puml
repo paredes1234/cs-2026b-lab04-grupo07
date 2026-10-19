@@ -1,0 +1,19 @@
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+LAYOUT_WITH_LEGEND()
+
+title Dynamic diagram - Flujo Confirmar y Pagar
+
+Person(cliente, "Cliente Web")
+Component(checkout, "Checkout Component", "React")
+Component(paymentController, "Payment Controller", "API")
+Component(pasarelaExt, "Pasarela Externa", "API Rest")
+Component(cpeEngine, "CPE Engine", "Service")
+
+Rel(cliente, checkout, "1. Hace clic en Confirmar y Pagar")
+Rel(checkout, paymentController, "2. Envía solicitud de pago")
+Rel(paymentController, pasarelaExt, "3. Procesa cobro")
+Rel(pasarelaExt, paymentController, "4. Retorna respuesta/Webhook")
+Rel(paymentController, cpeEngine, "5. Solicita emisión de comprobante")
+@enduml

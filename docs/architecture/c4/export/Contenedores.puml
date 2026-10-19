@@ -1,0 +1,22 @@
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+
+LAYOUT_WITH_LEGEND()
+
+title Container diagram for Sistema ERP Multimodular
+
+Person(usuario, "Usuario", "Cliente o empleado")
+
+Container(webApp, "Web Application", "React / PWA", "Interfaz gráfica para usuarios.")
+Container(apiGateway, "API Gateway", "Node.js / Express", "Enrutamiento y autenticación de peticiones.")
+Container(ventasService, "Servicio de Ventas e Ingresos", "Python / FastAPI", "Gestión de pedidos y caja.")
+Container(cpeService, "Servicio CPE y SUNAT", "Node.js", "Generación y envío de XML/CDR a SUNAT.")
+ContainerDb(database, "Base de Datos ERP", "PostgreSQL", "Almacena transacciones, libros y catálogos.")
+
+Rel(usuario, webApp, "Usa", "HTTPS")
+Rel(webApp, apiGateway, "Llama APIs", "HTTPS / JSON")
+Rel(apiGateway, ventasService, "Enruta solicitudes", "gRPC / HTTP")
+Rel(apiGateway, cpeService, "Enruta solicitudes de facturación", "gRPC / HTTP")
+Rel(ventasService, database, "Lee/Escribe", "SQL")
+Rel(cpeService, database, "Lee/Escribe", "SQL")
+@enduml

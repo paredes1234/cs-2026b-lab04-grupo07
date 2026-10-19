@@ -1,0 +1,6 @@
+graph TD
+    cliente["Cliente Web"] -->|1. Confirmar y Pagar| checkout["Checkout Component"]
+    checkout -->|2. Solicitud de pago| paymentController["Payment Controller"]
+    paymentController -->|3. Procesa cobro| pasarelaExt["Pasarela Externa"]
+    pasarelaExt -->|4. Retorna estado| paymentController
+    paymentController -->|5. Solicita emisión CPE| cpeEngine["CPE Engine"]

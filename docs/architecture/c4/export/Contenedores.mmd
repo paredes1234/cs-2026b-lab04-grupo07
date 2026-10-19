@@ -1,0 +1,7 @@
+graph TD
+    usuario["Usuario"] -->|HTTPS| webApp["Web Application (React)"]
+    webApp -->|HTTPS / JSON| apiGateway["API Gateway"]
+    apiGateway -->|gRPC / HTTP| ventasService["Servicio de Ventas e Ingresos"]
+    apiGateway -->|gRPC / HTTP| cpeService["Servicio CPE y SUNAT"]
+    ventasService -->|SQL| database[("PostgreSQL")]
+    cpeService -->|SQL| database

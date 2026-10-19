@@ -1,0 +1,6 @@
+graph TD
+    cliente["Cliente / Usuario ERP"] -->|Usa| sistemaERP["Sistema ERP Multimodular"]
+    empleado["Empleado Interno"] -->|Usa| sistemaERP
+    sistemaERP -->|Envía CPE / SIRE| sunat["SUNAT / OSE"]
+    sistemaERP -->|Procesa pagos| pasarela["Pasarela de Pagos"]
+    sistemaERP -->|Consulta extractos| bancos["Entidades Bancarias"]

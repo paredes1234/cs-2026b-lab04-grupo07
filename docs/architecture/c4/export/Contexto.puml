@@ -1,0 +1,22 @@
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Context.puml
+
+LAYOUT_WITH_LEGEND()
+
+title System Context diagram for Sistema ERP Multimodular
+
+Person(cliente, "Cliente / Usuario ERP", "Usuario que realiza pedidos y consultas.")
+Person(empleado, "Empleado Interno", "Personal de ventas, compras y contabilidad.")
+
+System(sistemaERP, "Sistema ERP Multimodular", "ERP para la gestión de ventas, compras, finanzas y libros electrónicas.")
+
+System_Ext(sunat, "SUNAT / OSE", "Validación y emisión de comprobantes de pago electrónicos.")
+System_Ext(pasarela, "Pasarela de Pagos", "Procesamiento de pagos en línea.")
+System_Ext(bancos, "Entidades Bancarias", "Extractos para conciliación bancaria.")
+
+Rel(cliente, sistemaERP, "Usa")
+Rel(empleado, sistemaERP, "Usa")
+Rel(sistemaERP, sunat, "Envía CPE / SIRE")
+Rel(sistemaERP, pasarela, "Procesa pagos")
+Rel(sistemaERP, bancos, "Consulta extractos")
+@enduml

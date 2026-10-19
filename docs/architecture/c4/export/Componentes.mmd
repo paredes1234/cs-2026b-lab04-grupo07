@@ -1,0 +1,8 @@
+graph TD
+    apiGateway["API Gateway"] -->|HTTP REST| ordersController["Orders Controller"]
+    subgraph Servicio de Ventas e Ingresos
+        ordersController --> orderEngine["Order Engine"]
+        orderEngine --> sunatValidator["Validador SUNAT"]
+        orderEngine --> repo["Order Repository"]
+    end
+    repo -->|SQL| database[("PostgreSQL")]

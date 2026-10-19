@@ -1,0 +1,10 @@
+graph TD
+    subgraph AWS Cloud
+        subgraph Amazon ECS
+            app["Web App & APIs (Docker)"]
+        end
+        subgraph Amazon RDS
+            db[("PostgreSQL Database")]
+        end
+    end
+    app -->|TCP / 5432| db

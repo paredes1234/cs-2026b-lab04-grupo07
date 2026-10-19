@@ -1,0 +1,18 @@
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Deployment.puml
+
+LAYOUT_WITH_LEGEND()
+
+title Deployment Diagram - Cloud AWS
+
+Deployment_Node(aws, "Amazon Web Services (AWS)", "Cloud"){
+    Deployment_Node(ecs, "Amazon ECS", "Docker Containers"){
+        Container(app, "Web App & APIs", "Docker")
+    }
+    Deployment_Node(rds, "Amazon RDS", "Database Node"){
+        ContainerDb(db, "PostgreSQL Database", "PostgreSQL 15")
+    }
+}
+
+Rel(app, db, "Conecta via TCP/5432")
+@enduml
