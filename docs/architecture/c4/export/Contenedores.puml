@@ -1,0 +1,46 @@
+@startuml
+title <size:24>Container View: San Camilo en Línea</size>\n<size:24>Nivel 2: PWA, aplicación modular, worker, base de datos y Redis.</size>
+
+set separator none
+left to right direction
+
+<style>
+  root {
+    BackgroundColor: #ffffff
+    FontColor: #444444
+  }
+</style>
+
+!include <C4/C4>
+!include <C4/C4_Context>
+!include <C4/C4_Container>
+
+Person(Cliente, "Cliente", $descr="Consulta productos, compra en varios puestos y paga un pedido único.", $tags="", $link="")
+Person(Comerciante, "Comerciante", $descr="Administra productos y prepara los pedidos de su puesto.", $tags="", $link="")
+Person(Repartidor, "Repartidor", $descr="Consulta pedidos de delivery y actualiza su entrega.", $tags="", $link="")
+System(PasareladepagoYape, "Pasarela de pago Yape", $descr="Proveedor externo utilizado mediante la interfaz PasarelaPago; integración abstracta en el MVP.", $tags="", $link="")
+System(ServiciodeWhatsApp, "Servicio de WhatsApp", $descr="Servicio externo al que se envían las confirmaciones y notificaciones.", $tags="", $link="")
+
+System_Boundary("SanCamiloenLínea_boundary", "San Camilo en Línea", $tags="") {
+  Container(SanCamiloenLínea.Workerdenotificaciones, "Worker de notificaciones", $techn="Python / Celery", $descr="Ejecuta tareas asíncronas y reintentos sin bloquear el pago.", $tags="", $link="")
+  ContainerDb(SanCamiloenLínea.Basededatosrelacional, "Base de datos relacional", $techn="PostgreSQL 16", $descr="Guarda clientes, puestos, productos, pedidos y pagos.", $tags="", $link="")
+  ContainerQueue(SanCamiloenLínea.Colaycaché, "Cola y caché", $techn="Redis", $descr="Gestiona la cola de tareas de Celery y el caché.", $tags="", $link="")
+  Container(SanCamiloenLínea.Aplicaciónwebprogresiva, "Aplicación web progresiva", $techn="HTML/CSS/JavaScript + Service Worker", $descr="Interfaz móvil para clientes, comerciantes y repartidores.", $tags="", $link="")
+  Container(SanCamiloenLínea.AplicaciónwebAPI, "Aplicación web / API", $techn="Python / Django (HTTP/JSON)", $descr="Monolito modular que procesa las operaciones del sistema mediante interfaces públicas.", $tags="", $link="")
+}
+
+Rel(Cliente, SanCamiloenLínea.Aplicaciónwebprogresiva, "Realiza sus compras", $techn="HTTPS", $tags="", $link="")
+Rel(Comerciante, SanCamiloenLínea.Aplicaciónwebprogresiva, "Gestiona su puesto", $techn="HTTPS", $tags="", $link="")
+Rel(Repartidor, SanCamiloenLínea.Aplicaciónwebprogresiva, "Consulta y actualiza entregas", $techn="HTTPS", $tags="", $link="")
+Rel(SanCamiloenLínea.Aplicaciónwebprogresiva, SanCamiloenLínea.AplicaciónwebAPI, "Envía solicitudes y recibe respuestas", $techn="HTTPS/JSON", $tags="", $link="")
+Rel(SanCamiloenLínea.AplicaciónwebAPI, SanCamiloenLínea.Basededatosrelacional, "Lee y registra datos de negocio", $techn="SQL/TCP", $tags="", $link="")
+Rel(SanCamiloenLínea.AplicaciónwebAPI, SanCamiloenLínea.Colaycaché, "Encola notificaciones y utiliza caché", $techn="Protocolo Redis/TCP", $tags="", $link="")
+Rel(SanCamiloenLínea.Workerdenotificaciones, SanCamiloenLínea.Colaycaché, "Consume tareas y registra reintentos", $techn="Protocolo Redis/TCP", $tags="", $link="")
+Rel(SanCamiloenLínea.Workerdenotificaciones, ServiciodeWhatsApp, "Envía mensajes y confirmaciones", $techn="HTTPS/JSON", $tags="", $link="")
+Rel(SanCamiloenLínea.AplicaciónwebAPI, PasareladepagoYape, "Solicita cobros mediante el adaptador Yape", $techn="HTTPS/JSON", $tags="", $link="")
+Rel(SanCamiloenLínea.Workerdenotificaciones, SanCamiloenLínea.AplicaciónwebAPI, "Ejecuta tareas del módulo Notificaciones", $techn="Celery/Python", $tags="", $link="")
+Rel(SanCamiloenLínea.AplicaciónwebAPI, ServiciodeWhatsApp, "Envía notificaciones del pedido", $techn="HTTPS/JSON", $tags="", $link="")
+
+SHOW_LEGEND(true)
+hide stereotypes
+@enduml

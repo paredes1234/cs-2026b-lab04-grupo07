@@ -1,0 +1,32 @@
+@startuml
+title <size:24>System Context View: San Camilo en Línea</size>\n<size:24>Nivel 1: usuarios, San Camilo en Línea y servicios externos.</size>
+
+set separator none
+left to right direction
+
+<style>
+  root {
+    BackgroundColor: #ffffff
+    FontColor: #444444
+  }
+</style>
+
+!include <C4/C4>
+!include <C4/C4_Context>
+
+Person(Cliente, "Cliente", $descr="Consulta productos, compra en varios puestos y paga un pedido único.", $tags="", $link="")
+System(PasareladepagoYape, "Pasarela de pago Yape", $descr="Proveedor externo utilizado mediante la interfaz PasarelaPago; integración abstracta en el MVP.", $tags="", $link="")
+System(ServiciodeWhatsApp, "Servicio de WhatsApp", $descr="Servicio externo al que se envían las confirmaciones y notificaciones.", $tags="", $link="")
+Person(Comerciante, "Comerciante", $descr="Administra productos y prepara los pedidos de su puesto.", $tags="", $link="")
+Person(Repartidor, "Repartidor", $descr="Consulta pedidos de delivery y actualiza su entrega.", $tags="", $link="")
+System(SanCamiloenLínea, "San Camilo en Línea", $descr="Plataforma de compras del Mercado San Camilo: catálogo, pedidos multipuesto, pago y entrega.", $tags="", $link="")
+
+Rel(Cliente, SanCamiloenLínea, "Consulta el catálogo, realiza pedidos multipuesto y paga", $techn="", $tags="", $link="")
+Rel(Comerciante, SanCamiloenLínea, "Publica productos y atiende pedidos", $techn="", $tags="", $link="")
+Rel(Repartidor, SanCamiloenLínea, "Consulta entregas asignadas y actualiza su estado", $techn="", $tags="", $link="")
+Rel(SanCamiloenLínea, PasareladepagoYape, "Solicita el cobro de pedidos con Yape", $techn="", $tags="", $link="")
+Rel(SanCamiloenLínea, ServiciodeWhatsApp, "Envía confirmaciones a comerciantes", $techn="", $tags="", $link="")
+
+SHOW_LEGEND(true)
+hide stereotypes
+@enduml
