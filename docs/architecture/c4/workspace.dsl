@@ -106,7 +106,7 @@ workspace "San Camilo en Línea" "Modelo C4 (E1-E6, Laboratorio 06). Arquitectur
             sancamilo.api.pedidos -> sancamilo.api.pagos "Solicita el cobro"
             sancamilo.api.pagos -> pasarela "Cobra con Yape" "HTTPS/JSON"
             sancamilo.api.pedidos -> sancamilo.bd "Guarda el pedido PAGADO y sus PedidoPuesto" "SQL/TCP"
-            sancamilo.api.notificaciones -> sancamilo.redis "Encola una notificación por puesto" "Protocolo Redis/TCP"
+            sancamilo.api.pedidos -> sancamilo.redis "Encola una notificación por puesto" "Protocolo Redis/TCP"
             sancamilo.worker -> sancamilo.redis "Consume la tarea" "Protocolo Redis/TCP"
             sancamilo.worker -> whatsapp "Notifica al comerciante" "HTTPS/JSON"
             autolayout lr
