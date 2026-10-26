@@ -1,0 +1,59 @@
+@startuml estados
+!include comun.iuml
+title San Camilo en Línea — Ciclo de vida de PedidoPuesto: State
+
+class PedidoPuesto <<contexto>> {
+  + id_puesto: str
+  + producto_id: str
+  + cantidad: int
+  + monto: float
+  + motivo_rechazo: str
+  + estado_actual: EstadoPedidoPuesto
+  + estado: str
+  + marcar_listo()
+  + rechazar(motivo)
+  + registrar_recojo()
+  + registrar_entrega()
+}
+abstract class EstadoPedidoPuesto <<State>> {
+  + nombre: str
+  + marcar_listo(pedido)
+  + rechazar(pedido, motivo)
+  + registrar_recojo(pedido)
+  + registrar_entrega(pedido)
+}
+class EstadoRecibido {
+  + marcar_listo(pedido)
+  + rechazar(pedido, motivo)
+}
+class EstadoListo {
+  + registrar_recojo(pedido)
+  + registrar_entrega(pedido)
+}
+class EstadoRecogido {
+  + registrar_entrega(pedido)
+}
+class EstadoEntregado
+class EstadoRechazado
+class TransicionEstadoInvalida <<excepción>>
+
+PedidoPuesto o--> "1" EstadoPedidoPuesto : estado actual
+EstadoPedidoPuesto <|-- EstadoRecibido
+EstadoPedidoPuesto <|-- EstadoListo
+EstadoPedidoPuesto <|-- EstadoRecogido
+EstadoPedidoPuesto <|-- EstadoEntregado
+EstadoPedidoPuesto <|-- EstadoRechazado
+EstadoPedidoPuesto ..> TransicionEstadoInvalida : lanza
+
+note right of EstadoPedidoPuesto
+  Por defecto toda transición lanza
+  TransicionEstadoInvalida. Cada estado
+  redefine solo las flechas de
+  estados-pedidopuesto.mmd (Lab 05).
+end note
+note bottom of EstadoListo
+  Las guardas [modalidad = DELIVERY]
+  y [modalidad = RECOJO] del Lab 05
+  aún no se verifican.
+end note
+@enduml

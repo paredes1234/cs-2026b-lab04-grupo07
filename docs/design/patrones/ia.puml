@@ -1,0 +1,62 @@
+@startuml ia
+!include comun.iuml
+title San Camilo en Línea — Normalizar nombres de productos con IA: Strategy + Adapter + Decorator + Chain of Responsibility
+
+interface ProveedorLLM <<Strategy>> {
+  + normalizar_nombre(nombre): str
+}
+class AdaptadorClienteLLM <<Adapter>> {
+  - _cliente: ClienteLLMExterno
+}
+interface ClienteLLMExterno <<externo>> {
+  + completar(prompt): str
+}
+class ConGuardrails <<Decorator>> {
+  - _interno: ProveedorLLM
+  - _cadena: Guardrail
+}
+class ConCache <<Decorator>> {
+  - _interno: ProveedorLLM
+  - _cache: dict
+  + aciertos: int
+}
+abstract class Guardrail <<Chain of Responsibility>> {
+  - _siguiente: Guardrail
+  + validar(entrada, salida): str
+  # _comprobar(entrada, salida): str
+}
+class GuardrailSoloNombre
+class GuardrailCatalogo {
+  - _alias: dict
+}
+
+ProveedorLLM <|.. AdaptadorClienteLLM
+ProveedorLLM <|.. ConGuardrails
+ProveedorLLM <|.. ConCache
+AdaptadorClienteLLM --> ClienteLLMExterno : traduce
+ConGuardrails o--> "1" ProveedorLLM : envuelve
+ConCache o--> "1" ProveedorLLM : envuelve
+ConGuardrails --> Guardrail : valida la salida
+Guardrail <|-- GuardrailSoloNombre
+Guardrail <|-- GuardrailCatalogo
+Guardrail o--> "0..1" Guardrail : siguiente
+
+note bottom of ConCache
+  crear_normalizador() arma:
+  ConCache(ConGuardrails(AdaptadorClienteLLM(cliente), cadena)).
+  Solo se cachean salidas que pasaron los guardrails.
+end note
+note right of GuardrailSoloNombre
+  Rechaza precios, números, signos
+  y respuestas de más de 5 palabras.
+end note
+note right of GuardrailCatalogo
+  La salida debe ser la forma canónica
+  del catálogo de alias: la IA no
+  inventa ni cambia productos.
+end note
+note left of ClienteLLMExterno
+  En las pruebas: ClienteLLMFalso
+  (sin clave de API ni red).
+end note
+@enduml

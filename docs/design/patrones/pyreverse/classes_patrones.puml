@@ -1,0 +1,135 @@
+@startuml classes_patrones
+set namespaceSeparator none
+class "AdaptadorClienteLLM" as src.despues.ia.AdaptadorClienteLLM {
+  normalizar_nombre(nombre: str) -> str
+}
+class "AdaptadorInventarioRepository" as src.despues.adaptadores.AdaptadorInventarioRepository {
+  repo : InventarioRepository
+  liberar_stock(producto_id: str, cantidad: int) -> None
+  reservar_stock(producto_id: str, cantidad: int) -> bool
+}
+class "AdaptadorPasarelaPago" as src.despues.adaptadores.AdaptadorPasarelaPago {
+  cliente : PasarelaPagoClient
+  procesar_pago(monto: float, token: str) -> str
+}
+class "AuditoriaPedidos" as src.despues.eventos.AuditoriaPedidos {
+  registros : list[dict[str, str]]
+  actualizar(evento: str, datos: dict[str, Any]) -> None
+}
+class "ClienteLLMExterno" as src.despues.ia.ClienteLLMExterno {
+  completar(prompt: str) -> str
+}
+class "ConCache" as src.despues.ia.ConCache {
+  aciertos : int
+  normalizar_nombre(nombre: str) -> str
+}
+class "ConGuardrails" as src.despues.ia.ConGuardrails {
+  normalizar_nombre(nombre: str) -> str
+}
+class "ConRegistroEventos" as src.despues.decoradores.ConRegistroEventos {
+  actualizar(evento: str, datos: dict[str, Any]) -> None
+}
+class "EstadoEntregado" as src.despues.estados.EstadoEntregado {
+  nombre : str
+}
+class "EstadoListo" as src.despues.estados.EstadoListo {
+  nombre : str
+  registrar_entrega(pedido) -> None
+  registrar_recojo(pedido) -> None
+}
+class "EstadoPedidoPuesto" as src.despues.estados.EstadoPedidoPuesto {
+  nombre : str
+  marcar_listo(pedido) -> None
+  rechazar(pedido, motivo: str) -> None
+  registrar_entrega(pedido) -> None
+  registrar_recojo(pedido) -> None
+}
+class "EstadoRechazado" as src.despues.estados.EstadoRechazado {
+  nombre : str
+}
+class "EstadoRecibido" as src.despues.estados.EstadoRecibido {
+  nombre : str
+  marcar_listo(pedido) -> None
+  rechazar(pedido, motivo: str) -> None
+}
+class "EstadoRecogido" as src.despues.estados.EstadoRecogido {
+  nombre : str
+  registrar_entrega(pedido) -> None
+}
+class "Guardrail" as src.despues.ia.Guardrail {
+  validar(entrada: str, salida: str) -> str
+}
+class "GuardrailCatalogo" as src.despues.ia.GuardrailCatalogo {
+}
+class "GuardrailSoloNombre" as src.despues.ia.GuardrailSoloNombre {
+}
+class "NotificadorComerciantes" as src.despues.eventos.NotificadorComerciantes {
+  bandeja : list[dict[str, str]]
+  actualizar(evento: str, datos: dict[str, Any]) -> None
+}
+class "PagoFactory" as src.despues.factory.PagoFactory {
+  obtener(nombre_variante)
+  registrar(nombre_variante, adaptador)
+}
+class "PedidoPuesto" as src.despues.dominio.PedidoPuesto {
+  cantidad : int
+  estado : str
+  estado_actual
+  id_puesto : str
+  monto : float
+  motivo_rechazo : NoneType
+  producto_id : str
+  transaccion_id : NoneType
+  marcar_listo() -> None
+  rechazar(motivo: str) -> None
+  registrar_entrega() -> None
+  registrar_recojo() -> None
+}
+class "PoliticaReintentos" as src.despues.estrategias.PoliticaReintentos {
+  max_reintentos : int
+  ejecutar(funcion_operacion)
+}
+class "ProveedorLLM" as src.despues.ia.ProveedorLLM {
+  {abstract}normalizar_nombre(nombre: str) -> str
+}
+class "PublicadorEventos" as src.despues.eventos.PublicadorEventos {
+  publicar(evento: str, datos: dict[str, Any]) -> None
+  suscribir(evento: str, suscriptor: Suscriptor) -> None
+}
+class "PuertoInventario" as src.despues.puertos.PuertoInventario {
+  {abstract}liberar_stock(producto_id: str, cantidad: int) -> None
+  {abstract}reservar_stock(producto_id: str, cantidad: int) -> bool
+}
+class "PuertoPago" as src.despues.puertos.PuertoPago {
+  {abstract}procesar_pago(monto: float, token: str) -> str
+}
+class "ServicioPedidosProcesadorRefactorizado" as src.despues.servicio.ServicioPedidosProcesadorRefactorizado {
+  conn
+  db_path : str
+  fabrica_pagos
+  inventario
+  publicador_eventos
+  confirmar_y_pagar(pedido_id: str, producto_id: str, cantidad: int, monto: float, token_tarjeta: str, max_reintentos: int, tipo_pago: str, puestos) -> dict
+}
+class "Suscriptor" as src.despues.eventos.Suscriptor {
+  actualizar(evento: str, datos: dict[str, Any]) -> None
+}
+class "<color:red>TransicionEstadoInvalida</color>" as src.despues.estados.TransicionEstadoInvalida {
+}
+src.despues.adaptadores.AdaptadorInventarioRepository --|> src.despues.puertos.PuertoInventario
+src.despues.adaptadores.AdaptadorPasarelaPago --|> src.despues.puertos.PuertoPago
+src.despues.estados.EstadoEntregado --|> src.despues.estados.EstadoPedidoPuesto
+src.despues.estados.EstadoListo --|> src.despues.estados.EstadoPedidoPuesto
+src.despues.estados.EstadoRechazado --|> src.despues.estados.EstadoPedidoPuesto
+src.despues.estados.EstadoRecibido --|> src.despues.estados.EstadoPedidoPuesto
+src.despues.estados.EstadoRecogido --|> src.despues.estados.EstadoPedidoPuesto
+src.despues.ia.AdaptadorClienteLLM --|> src.despues.ia.ProveedorLLM
+src.despues.ia.ConCache --|> src.despues.ia.ProveedorLLM
+src.despues.ia.ConGuardrails --|> src.despues.ia.ProveedorLLM
+src.despues.ia.GuardrailCatalogo --|> src.despues.ia.Guardrail
+src.despues.ia.GuardrailSoloNombre --|> src.despues.ia.Guardrail
+src.despues.servicio.ServicioPedidosProcesadorRefactorizado --> src.despues.adaptadores.AdaptadorInventarioRepository : inventario
+src.despues.servicio.ServicioPedidosProcesadorRefactorizado --> src.despues.eventos.PublicadorEventos : publicador_eventos
+src.despues.servicio.ServicioPedidosProcesadorRefactorizado --> src.despues.factory.PagoFactory : fabrica_pagos
+src.despues.estados.EstadoRecibido --* src.despues.dominio.PedidoPuesto : estado_actual
+@enduml
