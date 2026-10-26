@@ -4,7 +4,7 @@ skinparam shadowing false
 skinparam defaultFontName Arial
 skinparam classBackgroundColor #EEF2F8
 skinparam classBorderColor #1A3A5C
-title San Camilo en Línea — Pedido multipuesto (diseño)
+title San Camilo en Línea — Pedido multipuesto (diseño Lab 05 + patrones Lab 07)
 skinparam nodesep 25
 skinparam ranksep 40
 
@@ -63,13 +63,17 @@ package "pedidos" {
     PAGADO
     CANCELADO
   }
-  enum EstadoPedidoPuesto {
-    RECIBIDO
-    LISTO
-    RECOGIDO
-    ENTREGADO
-    RECHAZADO
+  abstract class EstadoPedidoPuesto <<State>> {
+    + marcar_listo(pedido)
+    + rechazar(pedido, motivo)
+    + registrar_recojo(pedido)
+    + registrar_entrega(pedido)
   }
+  class EstadoRecibido
+  class EstadoListo
+  class EstadoRecogido
+  class EstadoEntregado
+  class EstadoRechazado
   enum ModalidadEntrega {
     RECOJO
     DELIVERY
@@ -77,8 +81,12 @@ package "pedidos" {
   class PedidoController <<controlador>> {
     + pagarPedido(id: UUID, celularYape: String)
   }
-  class ServicioPedidos <<servicio>> {
-    + confirmarYPagar(pedidoId: UUID, celularYape: String): Pedido
+  class ServicioPedidosProcesadorRefactorizado <<servicio>> {
+    + confirmar_y_pagar(pedido_id, producto_id, cantidad, monto, token_tarjeta, max_reintentos, tipo_pago, puestos): dict
+  }
+  interface PuertoInventario <<puerto>> {
+    + reservar_stock(producto_id, cantidad): bool
+    + liberar_stock(producto_id, cantidad)
   }
   interface RepositorioPedidos <<puerto>> {
     + buscar(id: UUID): Pedido
@@ -94,21 +102,43 @@ package "pagos" {
     - aprobado: bool
     - fecha: DateTime
   }
-  interface PasarelaPago <<puerto>> {
-    + cobrar(monto: Decimal, celular: String, referencia: String): Pago
+  interface PuertoPago <<Strategy>> {
+    + procesar_pago(monto, token): str
   }
-  class YapeAdapter <<adaptador>> {
-    + cobrar(monto: Decimal, celular: String, referencia: String): Pago
+  class AdaptadorPasarelaPago <<Adapter>> {
+    + procesar_pago(monto, token): str
+  }
+  class PagoFactory <<Factory>> {
+    + registrar(nombre_variante, adaptador)
+    + obtener(nombre_variante): PuertoPago
   }
 }
 
 package "notificaciones" {
-  interface Notificador <<puerto>> {
-    + notificarPedidoPuesto(pp: PedidoPuesto): void
+  class PublicadorEventos <<Sujeto>> {
+    + suscribir(evento, suscriptor)
+    + publicar(evento, datos)
   }
-  class WhatsAppNotificador <<adaptador>> {
-    + notificarPedidoPuesto(pp: PedidoPuesto): void
+  interface Suscriptor <<Observer>> {
+    + actualizar(evento, datos)
   }
+  class NotificadorComerciantes <<Observer concreto>>
+  class AuditoriaPedidos <<Observer concreto>>
+  class ConRegistroEventos <<Decorator>>
+}
+
+package "catalogo.ia" {
+  interface ProveedorLLM <<Strategy>> {
+    + normalizar_nombre(nombre): str
+  }
+  class AdaptadorClienteLLM <<Adapter>>
+  class ConGuardrails <<Decorator>>
+  class ConCache <<Decorator>>
+  abstract class Guardrail <<Chain of Responsibility>> {
+    + validar(entrada, salida): str
+  }
+  class GuardrailSoloNombre
+  class GuardrailCatalogo
 }
 
 Cliente "1" -- "0..*" Pedido : realiza >
@@ -119,14 +149,30 @@ PedidoPuesto "0..*" -- "1" Puesto : atendido por >
 LineaPedido "0..*" --> "1" Producto
 Puesto "1" *-- "0..*" Producto : ofrece >
 Pedido "1" -- "0..1" Pago : se paga con >
-PasarelaPago <|.. YapeAdapter
-PasarelaPago -[hidden]down- Pago
-Notificador <|.. WhatsAppNotificador
-PedidoController ..> ServicioPedidos
-ServicioPedidos ..> Pedido
-ServicioPedidos ..> RepositorioPedidos
-ServicioPedidos ..> PasarelaPago
-ServicioPedidos ..> Notificador
+PedidoPuesto o--> "1" EstadoPedidoPuesto : estado_actual
+EstadoPedidoPuesto <|-- EstadoRecibido
+EstadoPedidoPuesto <|-- EstadoListo
+EstadoPedidoPuesto <|-- EstadoRecogido
+EstadoPedidoPuesto <|-- EstadoEntregado
+EstadoPedidoPuesto <|-- EstadoRechazado
+PuertoPago <|.. AdaptadorPasarelaPago
+PagoFactory o--> "0..*" PuertoPago
+PuertoPago -[hidden]down- Pago
+Suscriptor <|.. NotificadorComerciantes
+Suscriptor <|.. AuditoriaPedidos
+Suscriptor <|.. ConRegistroEventos
+ConRegistroEventos o--> "1" Suscriptor : envuelve
+PublicadorEventos o--> "0..*" Suscriptor
+ProveedorLLM <|.. AdaptadorClienteLLM
+ProveedorLLM <|.. ConGuardrails
+ProveedorLLM <|.. ConCache
+ConGuardrails --> Guardrail
+Guardrail <|-- GuardrailSoloNombre
+Guardrail <|-- GuardrailCatalogo
+PedidoController ..> ServicioPedidosProcesadorRefactorizado
+ServicioPedidosProcesadorRefactorizado --> PagoFactory : fabrica_pagos
+ServicioPedidosProcesadorRefactorizado --> PuertoInventario : inventario
+ServicioPedidosProcesadorRefactorizado --> PublicadorEventos : publicador_eventos
 
 note left of PedidoPuesto
   0 PedidoPuesto en BORRADOR, PAGO_PENDIENTE
@@ -140,8 +186,16 @@ note bottom of Pago
   No guarda el celular de Yape del cliente:
   se pasa a cobrar() y no se persiste (R-04).
 end note
-note bottom of WhatsAppNotificador
-  Encola la tarea en Celery + Redis;
-  reintentos <= 10 min (ADR-003, QA-03).
+note bottom of NotificadorComerciantes
+  Un aviso por puesto; simula la cola
+  Celery + Redis (ADR-003, QA-03).
+end note
+note top of ServicioPedidosProcesadorRefactorizado
+  Lab 07: servicio, puertos, adaptadores,
+  estados, eventos e IA existen en src/despues/
+  (verificado con pyreverse). Pedido, LineaPedido,
+  Producto, Puesto, Cliente, Pago, PedidoController
+  y RepositorioPedidos siguen siendo diseño del Lab 05:
+  el servicio aún recibe tipos simples y usa SQLite directo.
 end note
 @enduml

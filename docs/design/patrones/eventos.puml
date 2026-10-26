@@ -1,0 +1,47 @@
+@startuml eventos
+!include comun.iuml
+title San Camilo en Línea — Avisos del pago: Observer + Decorator
+
+class ServicioPedidosProcesadorRefactorizado <<cliente>> {
+  + confirmar_y_pagar(...): dict
+}
+class PublicadorEventos <<Sujeto>> {
+  - _suscriptores: dict[str, list[Suscriptor]]
+  + suscribir(evento, suscriptor)
+  + publicar(evento, datos)
+}
+interface Suscriptor <<Observer>> {
+  + actualizar(evento, datos)
+}
+class NotificadorComerciantes <<Observer concreto>> {
+  + bandeja: list
+}
+class AuditoriaPedidos <<Observer concreto>> {
+  + registros: list
+}
+class ConRegistroEventos <<Decorator>> {
+  - _interno: Suscriptor
+  - _registro: list
+}
+
+ServicioPedidosProcesadorRefactorizado --> PublicadorEventos : publicar("pedido_pagado")
+PublicadorEventos o--> "0..*" Suscriptor : notifica
+Suscriptor <|.. NotificadorComerciantes
+Suscriptor <|.. AuditoriaPedidos
+Suscriptor <|.. ConRegistroEventos
+ConRegistroEventos o--> "1" Suscriptor : envuelve
+
+note right of NotificadorComerciantes
+  Un aviso por puesto (whatsapp_simulado).
+  Simula la cola Celery + Redis (ADR-003).
+end note
+note bottom of ConRegistroEventos
+  Misma interfaz actualizar(); agrega un
+  registro sin teléfonos (Ley 29733, R-04).
+end note
+note left of PublicadorEventos
+  Se publica solo después de guardar el
+  pedido; un fallo de un suscriptor no
+  convierte el pago en error.
+end note
+@enduml
