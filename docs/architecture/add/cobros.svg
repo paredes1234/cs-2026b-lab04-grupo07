@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="520" height="260" font-family="sans-serif" font-size="12">
+<rect width="100%" height="100%" fill="white"/>
+<text x="260" y="20" text-anchor="middle" font-size="14">QA08-04: cobros duplicados por lote de 100 pedidos (1000 corridas)</text>
+<line x1="60" y1="210" x2="500" y2="210" stroke="black"/>
+<rect x="90" y="44.4" width="80" height="165.6" fill="#c0392b"/>
+<text x="130" y="38.4" text-anchor="middle">5.52 (máx 11)</text>
+<text x="130" y="228" text-anchor="middle">reintentos</text>
+<rect x="230" y="210.0" width="80" height="0.0" fill="#7f8c8d"/>
+<text x="270" y="204.0" text-anchor="middle">0.00 (máx 0)</text>
+<text x="270" y="228" text-anchor="middle">sin_reintento</text>
+<rect x="370" y="210.0" width="80" height="0.0" fill="#27ae60"/>
+<text x="410" y="204.0" text-anchor="middle">0.00 (máx 0)</text>
+<text x="410" y="228" text-anchor="middle">idempotente</text>
+<text x="260" y="250" text-anchor="middle" fill="#555">Meta QA08-04: 0 duplicados. Supuesto: 50 % de los timeouts son tardíos.</text>
+</svg>
