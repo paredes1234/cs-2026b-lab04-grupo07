@@ -1,0 +1,53 @@
+@startuml pagos
+!include comun.iuml
+title San Camilo en Línea — Pagos: Strategy + Adapter + Factory
+
+class ServicioPedidosProcesadorRefactorizado <<cliente>> {
+  + confirmar_y_pagar(pedido_id, producto_id, cantidad, monto, token_tarjeta, max_reintentos, tipo_pago, puestos): dict
+}
+class PagoFactory <<Factory>> {
+  - _adaptadores: dict
+  + registrar(nombre_variante, adaptador)
+  + obtener(nombre_variante): PuertoPago
+}
+interface PuertoPago <<Strategy>> {
+  + procesar_pago(monto, token): str
+}
+class AdaptadorPasarelaPago <<Adapter>> {
+  - cliente: PasarelaPagoClient
+}
+class PasarelaPagoClient <<externo>> {
+  + cobrar_tarjeta(monto, token_tarjeta): dict
+}
+interface PuertoInventario <<puerto>> {
+  + reservar_stock(producto_id, cantidad): bool
+  + liberar_stock(producto_id, cantidad)
+}
+class AdaptadorInventarioRepository <<Adapter>> {
+  - repo: InventarioRepository
+}
+class InventarioRepository <<externo>> {
+  + verificar_y_descontar(producto_id, cantidad): bool
+  + devolver_stock(producto_id, cantidad)
+}
+
+ServicioPedidosProcesadorRefactorizado --> PagoFactory : obtener(tipo_pago)
+ServicioPedidosProcesadorRefactorizado ..> PuertoPago : usa
+ServicioPedidosProcesadorRefactorizado --> PuertoInventario : reserva / libera
+PagoFactory o--> "0..*" PuertoPago : registra
+PuertoPago <|.. AdaptadorPasarelaPago
+PuertoInventario <|.. AdaptadorInventarioRepository
+AdaptadorPasarelaPago --> PasarelaPagoClient : traduce
+AdaptadorInventarioRepository --> InventarioRepository : traduce
+
+note right of PagoFactory
+  Nuevo medio = registrar("YAPE", adaptador)
+  sin modificar confirmar_y_pagar (Open/Closed).
+  Hoy el servicio registra solo "TARJETA"
+  en su ~__init__.
+end note
+note bottom of AdaptadorPasarelaPago
+  cobrar_tarjeta() responde un dict;
+  el adaptador devuelve solo transaccion_id.
+end note
+@enduml

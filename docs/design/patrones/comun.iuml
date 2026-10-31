@@ -1,0 +1,9 @@
+skinparam dpi 200
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam classAttributeIconSize 0
+skinparam classBackgroundColor #EEF2F8
+skinparam classBorderColor #1A3A5C
+skinparam noteBackgroundColor #FFF4E5
+skinparam noteBorderColor #C8310E
+hide empty members
