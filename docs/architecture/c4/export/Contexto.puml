@@ -17,9 +17,9 @@ left to right direction
 Person(Cliente, "Cliente", $descr="Consulta productos, compra en varios puestos y paga un pedido único.", $tags="", $link="")
 System(PasareladepagoYape, "Pasarela de pago Yape", $descr="Proveedor externo utilizado mediante la interfaz PasarelaPago; integración abstracta en el MVP.", $tags="", $link="")
 System(ServiciodeWhatsApp, "Servicio de WhatsApp", $descr="Servicio externo al que se envían las confirmaciones y notificaciones.", $tags="", $link="")
-Person(Comerciante, "Comerciante", $descr="Administra productos y prepara los pedidos de su puesto.", $tags="", $link="")
+Person(Comerciante, "Comerciante", $descr="Administra productos y prepara los pedidos de su puesto en uno de los tres mercados.", $tags="", $link="")
 Person(Repartidor, "Repartidor", $descr="Consulta pedidos de delivery y actualiza su entrega.", $tags="", $link="")
-System(SanCamiloenLínea, "San Camilo en Línea", $descr="Plataforma de compras del Mercado San Camilo: catálogo, pedidos multipuesto, pago y entrega.", $tags="", $link="")
+System(SanCamiloenLínea, "San Camilo en Línea", $descr="Plataforma de compras de los mercados San Camilo, Altiplano y Río Seco: catálogo, pedidos multipuesto, pago y entrega.", $tags="", $link="")
 
 Rel(Cliente, SanCamiloenLínea, "Consulta el catálogo, realiza pedidos multipuesto y paga", $techn="", $tags="", $link="")
 Rel(Comerciante, SanCamiloenLínea, "Publica productos y atiende pedidos", $techn="", $tags="", $link="")
