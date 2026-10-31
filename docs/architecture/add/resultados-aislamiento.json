@@ -1,0 +1,18 @@
+{
+  "escenario": "QA08-05",
+  "medida": "Registros de otro mercado expuestos en 100 intentos cruzados",
+  "intentos_cruzados": 100,
+  "semilla": 2026,
+  "mercados": [
+    "SAN_CAMILO",
+    "ALTIPLANO",
+    "RIO_SECO"
+  ],
+  "pedidos_sinteticos": 12,
+  "expuestos_antes": 100,
+  "expuestos_despues": 0,
+  "accesos_legitimos": 12,
+  "accesos_legitimos_aprobados": 12,
+  "objetivo_cumplido_en_prototipo": true,
+  "alcance": "Prototipo SQLite en memoria; NO validación de seguridad en producción"
+}
