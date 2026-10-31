@@ -10,6 +10,7 @@ import json
 from pathlib import Path
 
 from src.mercados.reglas import ReglasMercado
+from src.despues.factory import PagoFactory  # VIOLACION DE PRUEBA (FF-03)
 
 CONFIGURACION = Path(__file__).with_name("mercados.json")
 
