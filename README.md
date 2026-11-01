@@ -209,3 +209,25 @@ La complejidad promedio baja, pero el método principal sube de 10 a 11 porque l
 - [Métricas y trade-off (E6)](docs/design/patrones/metricas.md)
 - [Bitácora de IA (E7)](docs/design/patrones/bitacora-ia.md)
 - [ADR-005: patrones de diseño (E8)](docs/architecture/005-patrones-de-diseno.md)
+
+## Diseño de la arquitectura (Lab 08)
+
+[![fitness-functions](https://github.com/paredes1234/cs-2026b-lab04-grupo07/actions/workflows/fitness.yml/badge.svg?branch=main)](https://github.com/paredes1234/cs-2026b-lab04-grupo07/actions/workflows/fitness.yml)
+
+Escenario de crecimiento: se suman los mercados Altiplano y Río Seco, cada uno con sus reglas y comerciantes. La arquitectura se diseñó con ADD en tres iteraciones y se protege con fitness functions en cada Pull Request.
+
+### Árbol de utilidad
+![Árbol de utilidad](docs/architecture/utilidad/arbol.png)
+
+### Iteraciones de ADD
+
+| Iteración | Escenario | Táctica | Evidencia | ¿Cumple? |
+|-----------|-----------|---------|-----------|----------|
+| 1 | QA08-05 Aislamiento de datos entre mercados (H,H) | Filtro `mercado_id` tomado de la sesión | Prototipo: 100 → 0 registros ajenos en 100 intentos; 12 de 12 lecturas propias | Sí, en el prototipo (falta integrarlo con la autenticación y la API reales) |
+| 2 | QA08-04 Cobros sin duplicados (H,H) | Cobro idempotente: registro PENDIENTE y consulta antes de reintentar | Monte Carlo: 8 → 0 duplicados; 100 de 100 pedidos confirmados | Sí |
+| 3 | QA08-07 Alta de mercados (H,H) | Reglas como datos (`src/mercados` + `mercados.json`) | difflib: 3 → 0 módulos `.py` modificados (meta ≤ 2) | Sí (no reduce líneas: 9 frente a 6) |
+
+### Decisiones y evaluación
+- [ADR-006: Aislamiento de datos entre mercados mediante filtro mercado_id](docs/architecture/adr/006-aislamiento-datos.md) · [ADR-007: Cobros idempotentes con registro PENDIENTE](docs/architecture/adr/007-cobro-idempotente.md) · [ADR-008: Alta de mercados mediante reglas como datos](docs/architecture/adr/008-alta-mercados.md)
+- [Evaluación ATAM-lite](docs/architecture/atam-lite.md) · [Bitácora de IA](docs/architecture/bitacora-ia.md)
+- Fitness functions: [`.importlinter`](.importlinter) (FF-01 a FF-03) y [`tests/test_fitness.py`](tests/test_fitness.py) (FF-04 a FF-07)
