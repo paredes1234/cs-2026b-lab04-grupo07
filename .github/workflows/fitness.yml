@@ -1,0 +1,17 @@
+name: fitness-functions
+on:
+  pull_request:
+  push:
+    branches: [main]
+jobs:
+  arquitectura:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - run: pip install import-linter pytest
+      - name: Fitness functions estructurales (FF-01 a FF-03)
+        run: lint-imports
+      - name: Fitness functions de calidad (FF-04 a FF-07) y pruebas
+        run: python -m pytest -v

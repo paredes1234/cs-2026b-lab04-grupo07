@@ -160,3 +160,74 @@ graph LR
 - [Revisión C4 con la lista oficial (E7)](docs/architecture/c4/revision-c4.md)
 - [Explicación para público no técnico (E7)](docs/architecture/c4/explicacion.md)
 - [Bitácora de IA (Lab 06)](docs/architecture/c4/bitacora-ia.md)
+
+## Patrones de diseño (Lab 07)
+
+Refactorizamos el flujo "confirmar y pagar" del Lab 05 desde una versión ingenua ([`src/antes/`](src/antes/)) hacia una versión con patrones GoF ([`src/despues/`](src/despues/)). Cada patrón responde a un olor de [`olores.md`](olores.md) y tiene una prueba. Las decisiones están en el [ADR-005](docs/architecture/005-patrones-de-diseno.md).
+
+```bash
+python -m pytest -q            # 18 passed
+radon cc -s -a src/antes src/despues
+```
+
+### Olor → patrón → prueba
+
+| Olor | Patrón | Código | Prueba |
+|---|---|---|---|
+| El servicio crea y conoce los SDK concretos (olor 1) | Adapter + Strategy + Factory | `puertos.py`, `adaptadores.py`, `factory.py` | `test_open_closed.py::test_open_closed_agregar_nueva_variante_sin_modificar_servicio` |
+| Ciclo de vida de `PedidoPuesto` (máquina de estados del Lab 05) | State | `estados.py`, `dominio.py` | `test_comportamiento.py::test_transicion_estado_invalida_lanza_excepcion` |
+| El método principal avisa a mano a los interesados (olor 2) | Observer | `eventos.py` | `test_e4_observer_decorator.py::test_observer_nuevo_suscriptor_no_exige_cambiar_publicador` |
+| Registro transversal mezclado con el aviso | Decorator | `decoradores.py` | `test_e4_observer_decorator.py::test_decorator_agrega_registro_sin_modificar_aviso` |
+| La salida del LLM no es confiable y el proveedor puede cambiar | Strategy + Adapter + Decorator + Chain of Responsibility | `ia.py` | `test_e5_ia.py` (10 casos: caché, guardrails, proveedor sustituible) |
+| Reintentos en un bucle interno (olor 3) | Decorator (pendiente) | `estrategias.py` existe, pero el servicio no lo usa | — |
+
+Patrones rechazados: un framework externo de máquina de estados (propuesto por la IA, olor 4) y Composite (`metricas.md`, sección 3).
+
+### Métricas (radon, detalle en [`metricas.md`](docs/design/patrones/metricas.md))
+
+| Métrica | Antes | Después |
+|---|---:|---:|
+| CC promedio (radon `-a`) | 3,27 | 1,99 |
+| CC máxima (`confirmar_y_pagar`) | 10 (B) | 11 (C) |
+| SLOC | 80 | 401 |
+| Archivos Python | 2 | 10 |
+
+La complejidad promedio baja, pero el método principal sube de 10 a 11 porque los reintentos siguen dentro de él. El código crece 5 veces. Los patrones se justifican por los cambios previstos (Yape, avisos a varios puestos, IA), no por las métricas.
+
+### Diagramas (PlantUML)
+
+- [Pagos: Strategy + Adapter + Factory](docs/design/patrones/img/pagos.png) ([fuente](docs/design/patrones/pagos.puml))
+- [State de `PedidoPuesto`](docs/design/patrones/img/estados.png) ([fuente](docs/design/patrones/estados.puml))
+- [Observer + Decorator](docs/design/patrones/img/eventos.png) ([fuente](docs/design/patrones/eventos.puml))
+- [IA: Strategy + Adapter + Decorator + Chain of Responsibility](docs/design/patrones/img/ia.png) ([fuente](docs/design/patrones/ia.puml))
+- [Diagrama de clases del Lab 05 actualizado](docs/design/img/clases.png) ([fuente](docs/design/clases.puml))
+- [Diagrama generado con pyreverse](docs/design/patrones/img/classes_patrones.png) y su [verificación](docs/design/patrones/verificacion-pyreverse.md)
+
+### Documentos del Lab 07
+
+- [Olores y decisiones (E1)](olores.md)
+- [Métricas y trade-off (E6)](docs/design/patrones/metricas.md)
+- [Bitácora de IA (E7)](docs/design/patrones/bitacora-ia.md)
+- [ADR-005: patrones de diseño (E8)](docs/architecture/005-patrones-de-diseno.md)
+
+## Diseño de la arquitectura (Lab 08)
+
+[![fitness-functions](https://github.com/paredes1234/cs-2026b-lab04-grupo07/actions/workflows/fitness.yml/badge.svg?branch=main)](https://github.com/paredes1234/cs-2026b-lab04-grupo07/actions/workflows/fitness.yml)
+
+Escenario de crecimiento: se suman los mercados Altiplano y Río Seco, cada uno con sus reglas y comerciantes. La arquitectura se diseñó con ADD en tres iteraciones y se protege con fitness functions en cada Pull Request.
+
+### Árbol de utilidad
+![Árbol de utilidad](docs/architecture/utilidad/arbol.png)
+
+### Iteraciones de ADD
+
+| Iteración | Escenario | Táctica | Evidencia | ¿Cumple? |
+|-----------|-----------|---------|-----------|----------|
+| 1 | QA08-05 Aislamiento de datos entre mercados (H,H) | Filtro `mercado_id` tomado de la sesión | Prototipo: 100 → 0 registros ajenos en 100 intentos; 12 de 12 lecturas propias | Sí, en el prototipo (falta integrarlo con la autenticación y la API reales) |
+| 2 | QA08-04 Cobros sin duplicados (H,H) | Cobro idempotente: registro PENDIENTE y consulta antes de reintentar | Monte Carlo: 8 → 0 duplicados; 100 de 100 pedidos confirmados | Sí |
+| 3 | QA08-07 Alta de mercados (H,H) | Reglas como datos (`src/mercados` + `mercados.json`) | difflib: 3 → 0 módulos `.py` modificados (meta ≤ 2) | Sí (no reduce líneas: 9 frente a 6) |
+
+### Decisiones y evaluación
+- [ADR-006: Aislamiento de datos entre mercados mediante filtro mercado_id](docs/architecture/adr/006-aislamiento-datos.md) · [ADR-007: Cobros idempotentes con registro PENDIENTE](docs/architecture/adr/007-cobro-idempotente.md) · [ADR-008: Alta de mercados mediante reglas como datos](docs/architecture/adr/008-alta-mercados.md)
+- [Evaluación ATAM-lite](docs/architecture/atam-lite.md) · [Bitácora de IA](docs/architecture/bitacora-ia.md)
+- Fitness functions: [`.importlinter`](.importlinter) (FF-01 a FF-03) y [`tests/test_fitness.py`](tests/test_fitness.py) (FF-04 a FF-07)

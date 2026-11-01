@@ -1,4 +1,5 @@
 # Bitácora de uso de IA — San Camilo en Línea
+   > Laboratorios 04 y 08. Las filas 1 a 7 son del Lab 04; las filas 8 a 14, del Lab 08.
 
 | # | Fecha | Herramienta | Prompt (resumen) | Qué propuso la IA | Qué verificamos o corregimos | Decisión |
 |---|-------|-------------|------------------|-------------------|------------------------------|----------|
@@ -9,7 +10,13 @@
 | 5 | 04/10/2026 | Claude Opus 5.5 | Generar `despliegue.py` (E6): vista de despliegue con Python Diagrams. | Script de Python Diagrams con infraestructura en AWS (EC2 y RDS). | (1) La IA asumió AWS, a pesar de que el prompt pedía nodos genéricos de `diagrams.onprem`. Nuestra restricción es un VPS con Docker, Nginx y Django, así que se reemplazaron las importaciones por `diagrams.onprem` (Nginx, PostgreSQL, Redis, Celery, Prometheus, Grafana). (2) La IA usó una sintaxis desactualizada de la librería `diagrams` que daba `AttributeError` al ejecutarla. Rodrigo corrigió a mano las conexiones de Celery y Redis. | Corregida |
 | 6 | 04/10/2026 | Claude (Opus 5.5) | Compilar en archivos `.md` el trabajo del grupo (guía del laboratorio y avance de E1 a E6) como contexto local para Claude Code. | Archivos Markdown locales (no versionados) con la guía y la transcripción del avance de E1 a E6. | Se usaron solo como contexto. La fuente de verdad son los archivos del repositorio. Al compararlos, Claude Code encontró diferencias: el diagrama Mermaid reconstruido en el avance no es igual a `diagrams/arquitectura.mmd`, y el RF-02 del avance está desactualizado frente a `drivers.md`. Por eso se trabajó con los archivos del repositorio. | Aceptada |
 | 7 | 04/10/2026 | Claude Code (Opus 5.5) | Revisar el repositorio y redactar el borrador de la bitácora (E7) y del README (E8) con los datos que reunió el grupo. | Diagnóstico del repositorio (rutas reales de E1 a E6, R-02 sin completar, falta la carpeta `img/`) y borrador de esta bitácora. | Cristhian revisó el borrador antes del commit. Las fechas salen de `git log`. Los datos que no se conocían quedaron marcados como pendientes en lugar de inventarse. | Aceptada |
-
+| 8 | [fecha E1] | [herramienta] | Prompt IA 1 (Lab 08, E1): escenarios de calidad de seis partes para el crecimiento con los mercados Altiplano y Río Seco, con (importancia, dificultad). | Ocho escenarios medibles. Calificó QA08-05 (aislamiento de datos entre mercados) como (M,M). | Con más mercados y comerciantes hay más datos que proteger, y un pedido visible para otro mercado es grave. Se subió a (H,H) y se anotó en el árbol de utilidad. | Corregida |
+| 9 | [fecha E2] | [herramienta] | Prompt IA 2 (Lab 08, E2): conceptos de diseño para QA08-05. | Filtro por `mercado_id`, PostgreSQL RLS, base de datos por mercado y filtrado solo en la interfaz. | Prototipo en SQLite: sin filtro se expusieron 100 registros ajenos en 100 intentos; con filtro, 0, y 12 de 12 lecturas propias. La base por mercado sube el costo y el mantenimiento. El filtro solo en la interfaz no protege lo que envía la API. RLS queda pendiente por la configuración extra. | Aceptada (filtro; 2 alternativas rechazadas) |
+| 10 | [fecha E4] | [herramienta] | Prompt IA 2 (Lab 08, E4): conceptos para QA08-04, cobros sin duplicados. | Reintentos sin clave (línea base), sin reintento, cobro idempotente, circuit breaker y transacción distribuida (2PC). | Monte Carlo (`fitness/cobros.py`: 100 pedidos, 10 timeouts, 50 % tardíos, 10 % de fallas en reintentos, 3 intentos): la base duplicó 8 cobros (5,52 en promedio en 1000 corridas). Sin reintento no duplica pero se pierden 10 ventas. Con idempotencia: 0 duplicados y 100 de 100 pedidos. El breaker no distingue un timeout tardío de uno temprano; el proveedor no participa en un 2PC. | Aceptada (idempotencia; 3 alternativas rechazadas) |
+| 11 | [fecha E4] | [herramienta] | Prompt IA 2 (Lab 08, E4): conceptos para QA08-07, alta de mercados. | Condicionales por mercado, módulo `mercados` con reglas como datos, motor de reglas (DSL) y una instancia por mercado. | `fitness/alta_mercados.py` con difflib: con condicionales se modifican 3 módulos `.py` (meta ≤ 2); con configuración, 0. La configuración no reduce líneas (9 frente a 6). El DSL excede el plazo y el equipo; una instancia por mercado triplica despliegues y contradice el ADR-001. | Aceptada (reglas como datos; 3 alternativas rechazadas) |
+| 12 | [fecha E7] | [herramienta] | Prompt IA 3 (Lab 08, E7): evaluador adversario ATAM-lite sobre el árbol, los ADR-006 a 008 y las simulaciones. | [hallazgo real de la IA que sí se confirmó] | [cómo lo verificaron contra el repositorio] | [Aceptada / Corregida] |
+| 13 | [fecha E7] | [herramienta] | Prompt IA 3 (Lab 08, E7): el mismo evaluador adversario. | **[FALSO POSITIVO: copiar el hallazgo exacto que dio la IA]** | **[evidencia que lo refuta: archivo, línea, número o prueba]** | **Rechazada (falso positivo)** |
+| 14 | 31/10/2026 | Claude | Redacción de `atam-lite.md`, del script de la matriz de riesgos y de la sección del README (E7 y E8) a partir del informe del Lab 08. | Tablas de hallazgos, matriz de probabilidad e impacto, mitigaciones y el texto del README. | Se ejecutó `python fitness/matriz_riesgos.py` y generó la matriz. Los números (100 → 0, 8 → 0, 3 → 0 módulos) se contrastaron con `iteracion-1.md` a `-3.md` y los ADR. La probabilidad y el impacto de cada riesgo son juicio del equipo y se ajustaron. | Corregida |
 > Los prompts completos están en el "Anexo: prompts", al final de este archivo.
 > Nunca se incluyen datos personales ni información confidencial en un prompt.
 
@@ -155,4 +162,27 @@ Verificación antes de terminar:
 - Confirma que el bloque Mermaid es idéntico a diagrams/arquitectura.mmd.
 - Confirma que git status solo muestra README.md (y bitacora-ia.md si aún no lo commiteé), y nunca CLAUDE.md, guia-lab04.md ni avance-lab04.md.
 - Al final, lista los <PENDIENTE: ...> que queden.
+```
+### Interacción 8 — Escenarios de calidad (Lab 08, E1)
+
+```text
+Actúa como arquitecto de software. Contexto: [pegar drivers.md, ADR-001 y el nuevo contexto: se suman los mercados Altiplano y Río Seco, cada uno con sus reglas y comerciantes]. Tarea: propón escenarios de calidad de seis partes (fuente, estímulo, entorno, artefacto, respuesta, medida) para rendimiento, disponibilidad, seguridad y modificabilidad. Para cada uno sugiere (importancia, dificultad) con H/M/L y justifícalo. Restricciones: medidas numéricas; no propongas soluciones todavía.
+```
+
+### Interacciones 9 a 11 — Tácticas candidatas (Lab 08, E2 y E4)
+
+```text
+Para el escenario [QA08-05 / QA08-04 / QA08-07] [pegar], propón 4 tácticas candidatas del catálogo de Bass et al. Para cada una indica: qué mejora, qué empeora, costo aproximado y complejidad para un equipo de 3 developers en 1 mes. Respeta el ADR-001 (monolito modular); si recomiendas cambiar el estilo, justifícalo con números.
+```
+
+### Interacciones 12 y 13 — Evaluador adversario (Lab 08, E7)
+
+```text
+Actúa como evaluador ATAM escéptico. Te paso el árbol de utilidad, los ADR-006 a 008, la vista de contenedores y los resultados de las simulaciones [pegar]. Para cada escenario (H,*) identifica: puntos de sensibilidad, puntos de trade-off, riesgos y no riesgos. Para cada riesgo indica probabilidad e impacto (1 a 5) y una pregunta incómoda que el equipo debería poder responder. No propongas rediseños completos; cita la evidencia que te falta.
+```
+
+### Interacción 14 — Borrador de atam-lite.md, matriz y README (E7 y E8)
+
+```text
+[pegar el prompt o resumen de lo que pidieron: completar atam-lite.md, la matriz de riesgos y la sección del README con los datos del informe del Lab 08]
 ```

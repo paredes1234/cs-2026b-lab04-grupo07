@@ -1,0 +1,30 @@
+{
+  "mercado_nuevo": "MERCADO_PRUEBA",
+  "resultados": [
+    {
+      "alternativa": "A. condicionales",
+      "modulos_existentes_modificados": 3,
+      "archivos": [
+        "catalogo.py",
+        "entrega.py",
+        "pedidos.py"
+      ],
+      "lineas_cambiadas": 6,
+      "mercado_nuevo_funciona": true
+    },
+    {
+      "alternativa": "B. configuración (src/mercados)",
+      "modulos_existentes_modificados": 0,
+      "archivos": [
+        "mercados.json"
+      ],
+      "lineas_cambiadas": 9,
+      "mercado_nuevo_funciona": true
+    }
+  ],
+  "literales_fuera_de_mercados": {
+    "antes": [],
+    "despues": [],
+    "pedidos": []
+  }
+}

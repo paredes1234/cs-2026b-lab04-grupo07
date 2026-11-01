@@ -4,35 +4,36 @@ graph LR
   subgraph diagram ["Deployment View: San Camilo en Línea - Producción"]
     style diagram fill:#ffffff,stroke:#ffffff
 
-    subgraph 52 ["Celular del usuario"]
-      style 52 fill:#ffffff,stroke:#444444,color:#444444
+    subgraph 59 ["Celular del usuario"]
+      style 59 fill:#ffffff,stroke:#444444,color:#444444
 
-      53["<div style='font-weight: bold'>Aplicación web progresiva</div><div style='font-size: 70%; margin-top: 0px'>[Container: HTML/CSS/JavaScript + Service Worker]</div><div style='font-size: 80%; margin-top:10px'>Interfaz móvil para clientes,<br />comerciantes y repartidores.</div>"]
-      style 53 fill:#438dd5,stroke:#2e6295,color:#ffffff
+      60["<div style='font-weight: bold'>Aplicación web progresiva</div><div style='font-size: 70%; margin-top: 0px'>[Container: HTML/CSS/JavaScript + Service Worker]</div><div style='font-size: 80%; margin-top:10px'>Interfaz móvil para clientes,<br />comerciantes y repartidores;<br />solo por HTTPS. [QA08-01,<br />QA08-06]</div>"]
+      style 60 fill:#438dd5,stroke:#2e6295,color:#ffffff
     end
 
-    subgraph 54 ["Servidor VPS en la nube"]
-      style 54 fill:#ffffff,stroke:#444444,color:#444444
+    subgraph 61 ["Servidor VPS en la nube"]
+      style 61 fill:#ffffff,stroke:#444444,color:#444444
 
-      subgraph 55 ["Docker Compose"]
-        style 55 fill:#ffffff,stroke:#444444,color:#444444
+      subgraph 62 ["Docker Compose"]
+        style 62 fill:#ffffff,stroke:#444444,color:#444444
 
-        56["<div style='font-weight: bold'>Aplicación web / API</div><div style='font-size: 70%; margin-top: 0px'>[Container: Python / Django (HTTP/JSON)]</div><div style='font-size: 80%; margin-top:10px'>Monolito modular que procesa<br />las operaciones del sistema<br />mediante interfaces públicas.</div>"]
-        style 56 fill:#438dd5,stroke:#2e6295,color:#ffffff
-        58["<div style='font-weight: bold'>Worker de notificaciones</div><div style='font-size: 70%; margin-top: 0px'>[Container: Python / Celery]</div><div style='font-size: 80%; margin-top:10px'>Ejecuta tareas asíncronas y<br />reintentos sin bloquear el<br />pago.</div>"]
-        style 58 fill:#438dd5,stroke:#2e6295,color:#ffffff
-        60[("<div style='font-weight: bold'>Base de datos relacional</div><div style='font-size: 70%; margin-top: 0px'>[Container: PostgreSQL 16]</div><div style='font-size: 80%; margin-top:10px'>Guarda clientes, puestos,<br />productos, pedidos y pagos.</div>")]
-        style 60 fill:#438dd5,stroke:#2e6295,color:#ffffff
-        62["<div style='font-weight: bold'>Cola y caché</div><div style='font-size: 70%; margin-top: 0px'>[Container: Redis]</div><div style='font-size: 80%; margin-top:10px'>Gestiona la cola de tareas de<br />Celery y el caché.</div>"]
-        style 62 fill:#438dd5,stroke:#2e6295,color:#ffffff
+        63["<div style='font-weight: bold'>Aplicación web / API</div><div style='font-size: 70%; margin-top: 0px'>[Container: Python / Django (HTTP/JSON)]</div><div style='font-size: 80%; margin-top:10px'>Monolito modular (ADR-001);<br />filtra por mercado_id de la<br />sesión, cobra con clave de<br />idempotencia y lee las reglas<br />de cada mercado. [QA08-01,<br />QA08-02, QA08-04, QA08-05,<br />QA08-07]</div>"]
+        style 63 fill:#438dd5,stroke:#2e6295,color:#ffffff
+        65["<div style='font-weight: bold'>Worker de notificaciones y conciliación</div><div style='font-size: 70%; margin-top: 0px'>[Container: Python / Celery]</div><div style='font-size: 80%; margin-top:10px'>Reintenta avisos sin bloquear<br />el pago y concilia cada 5 min<br />los cobros en PENDIENTE<br />(ADR-007). [QA08-03, QA08-04]</div>"]
+        style 65 fill:#438dd5,stroke:#2e6295,color:#ffffff
+        67[("<div style='font-weight: bold'>Base de datos relacional</div><div style='font-size: 70%; margin-top: 0px'>[Container: PostgreSQL 16]</div><div style='font-size: 80%; margin-top:10px'>Una sola base para los tres<br />mercados: tablas con<br />mercado_id (ADR-006) e<br />intentos_pago con clave de<br />idempotencia (ADR-007).<br />[QA08-04, QA08-05]</div>")]
+        style 67 fill:#438dd5,stroke:#2e6295,color:#ffffff
+        70["<div style='font-weight: bold'>Cola y caché</div><div style='font-size: 70%; margin-top: 0px'>[Container: Redis]</div><div style='font-size: 80%; margin-top:10px'>Cola de tareas de Celery y<br />caché del catálogo. [QA08-01,<br />QA08-03]</div>"]
+        style 70 fill:#438dd5,stroke:#2e6295,color:#ffffff
       end
 
     end
 
-    53-. "<div>Envía solicitudes y recibe<br />respuestas</div><div style='font-size: 70%'>[HTTPS/JSON]</div>" .->56
-    58-. "<div>Ejecuta tareas del módulo<br />Notificaciones</div><div style='font-size: 70%'>[Celery/Python]</div>" .->56
-    56-. "<div>Lee y registra datos de<br />negocio</div><div style='font-size: 70%'>[SQL/TCP]</div>" .->60
-    56-. "<div>Encola notificaciones y<br />utiliza caché</div><div style='font-size: 70%'>[Protocolo Redis/TCP]</div>" .->62
-    58-. "<div>Consume tareas y registra<br />reintentos</div><div style='font-size: 70%'>[Protocolo Redis/TCP]</div>" .->62
+    60-. "<div>Envía solicitudes y recibe<br />respuestas</div><div style='font-size: 70%'>[HTTPS/JSON]</div>" .->63
+    65-. "<div>Ejecuta tareas del módulo<br />Notificaciones</div><div style='font-size: 70%'>[Celery/Python]</div>" .->63
+    63-. "<div>Lee y registra datos de<br />negocio</div><div style='font-size: 70%'>[SQL/TCP]</div>" .->67
+    65-. "<div>Lee y actualiza intentos_pago<br />en PENDIENTE [QA08-04]</div><div style='font-size: 70%'>[SQL/TCP]</div>" .->67
+    63-. "<div>Encola notificaciones y<br />utiliza caché</div><div style='font-size: 70%'>[Protocolo Redis/TCP]</div>" .->70
+    65-. "<div>Consume tareas y registra<br />reintentos</div><div style='font-size: 70%'>[Protocolo Redis/TCP]</div>" .->70
 
   end
