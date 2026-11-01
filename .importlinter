@@ -1,0 +1,40 @@
+# Fitness functions estructurales (E5, Lab 08). Ejecutar: lint-imports
+[importlinter]
+root_package = src
+
+[importlinter:contract:capas]
+name = FF-01 Capas del flujo de pago sin ciclos (ADR-001)
+type = layers
+containers =
+    src.despues
+layers =
+    servicio
+    adaptadores | decoradores | dominio | factory | ia
+    eventos | estados | puertos | estrategias
+
+[importlinter:contract:adaptadores]
+name = FF-02 Solo los adaptadores importan los clientes externos (ADR-005)
+type = forbidden
+source_modules =
+    src.despues.servicio
+    src.despues.dominio
+    src.despues.estados
+    src.despues.eventos
+    src.despues.decoradores
+    src.despues.factory
+    src.despues.puertos
+    src.despues.estrategias
+    src.despues.ia
+forbidden_modules =
+    src.antes
+allow_indirect_imports = True
+
+[importlinter:contract:mercados]
+name = FF-03 Las reglas de mercado no dependen de pedidos ni pagos (ADR-008)
+type = forbidden
+source_modules =
+    src.mercados
+forbidden_modules =
+    src.despues
+    src.antes
+    src.pedidos

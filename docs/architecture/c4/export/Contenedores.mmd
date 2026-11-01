@@ -6,27 +6,27 @@ graph LR
 
     1["<div style='font-weight: bold'>Cliente</div><div style='font-size: 70%; margin-top: 0px'>[Person]</div><div style='font-size: 80%; margin-top:10px'>Consulta productos, compra en<br />varios puestos y paga un<br />pedido único.</div>"]
     style 1 fill:#08427b,stroke:#052e56,color:#ffffff
-    2["<div style='font-weight: bold'>Comerciante</div><div style='font-size: 70%; margin-top: 0px'>[Person]</div><div style='font-size: 80%; margin-top:10px'>Administra productos y<br />prepara los pedidos de su<br />puesto.</div>"]
+    2["<div style='font-weight: bold'>Comerciante</div><div style='font-size: 70%; margin-top: 0px'>[Person]</div><div style='font-size: 80%; margin-top:10px'>Administra productos y<br />prepara los pedidos de su<br />puesto en uno de los tres<br />mercados.</div>"]
     style 2 fill:#08427b,stroke:#052e56,color:#ffffff
     3["<div style='font-weight: bold'>Repartidor</div><div style='font-size: 70%; margin-top: 0px'>[Person]</div><div style='font-size: 80%; margin-top:10px'>Consulta pedidos de delivery<br />y actualiza su entrega.</div>"]
     style 3 fill:#08427b,stroke:#052e56,color:#ffffff
-    16["<div style='font-weight: bold'>Pasarela de pago Yape</div><div style='font-size: 70%; margin-top: 0px'>[Software System]</div><div style='font-size: 80%; margin-top:10px'>Proveedor externo utilizado<br />mediante la interfaz<br />PasarelaPago; integración<br />abstracta en el MVP.</div>"]
-    style 16 fill:#737a86,stroke:#50555d,color:#ffffff
-    17["<div style='font-weight: bold'>Servicio de WhatsApp</div><div style='font-size: 70%; margin-top: 0px'>[Software System]</div><div style='font-size: 80%; margin-top:10px'>Servicio externo al que se<br />envían las confirmaciones y<br />notificaciones.</div>"]
+    17["<div style='font-weight: bold'>Pasarela de pago Yape</div><div style='font-size: 70%; margin-top: 0px'>[Software System]</div><div style='font-size: 80%; margin-top:10px'>Proveedor externo utilizado<br />mediante la interfaz<br />PasarelaPago; integración<br />abstracta en el MVP.</div>"]
     style 17 fill:#737a86,stroke:#50555d,color:#ffffff
+    18["<div style='font-weight: bold'>Servicio de WhatsApp</div><div style='font-size: 70%; margin-top: 0px'>[Software System]</div><div style='font-size: 80%; margin-top:10px'>Servicio externo al que se<br />envían las confirmaciones y<br />notificaciones.</div>"]
+    style 18 fill:#737a86,stroke:#50555d,color:#ffffff
 
     subgraph 4 ["San Camilo en Línea"]
       style 4 fill:#ffffff,stroke:#0b4884,color:#0b4884
 
-      13["<div style='font-weight: bold'>Worker de notificaciones</div><div style='font-size: 70%; margin-top: 0px'>[Container: Python / Celery]</div><div style='font-size: 80%; margin-top:10px'>Ejecuta tareas asíncronas y<br />reintentos sin bloquear el<br />pago.</div>"]
-      style 13 fill:#438dd5,stroke:#2e6295,color:#ffffff
-      14[("<div style='font-weight: bold'>Base de datos relacional</div><div style='font-size: 70%; margin-top: 0px'>[Container: PostgreSQL 16]</div><div style='font-size: 80%; margin-top:10px'>Guarda clientes, puestos,<br />productos, pedidos y pagos.</div>")]
+      14["<div style='font-weight: bold'>Worker de notificaciones y conciliación</div><div style='font-size: 70%; margin-top: 0px'>[Container: Python / Celery]</div><div style='font-size: 80%; margin-top:10px'>Reintenta avisos sin bloquear<br />el pago y concilia cada 5 min<br />los cobros en PENDIENTE<br />(ADR-007). [QA08-03, QA08-04]</div>"]
       style 14 fill:#438dd5,stroke:#2e6295,color:#ffffff
-      15["<div style='font-weight: bold'>Cola y caché</div><div style='font-size: 70%; margin-top: 0px'>[Container: Redis]</div><div style='font-size: 80%; margin-top:10px'>Gestiona la cola de tareas de<br />Celery y el caché.</div>"]
+      15[("<div style='font-weight: bold'>Base de datos relacional</div><div style='font-size: 70%; margin-top: 0px'>[Container: PostgreSQL 16]</div><div style='font-size: 80%; margin-top:10px'>Una sola base para los tres<br />mercados: tablas con<br />mercado_id (ADR-006) e<br />intentos_pago con clave de<br />idempotencia (ADR-007).<br />[QA08-04, QA08-05]</div>")]
       style 15 fill:#438dd5,stroke:#2e6295,color:#ffffff
-      5["<div style='font-weight: bold'>Aplicación web progresiva</div><div style='font-size: 70%; margin-top: 0px'>[Container: HTML/CSS/JavaScript + Service Worker]</div><div style='font-size: 80%; margin-top:10px'>Interfaz móvil para clientes,<br />comerciantes y repartidores.</div>"]
+      16["<div style='font-weight: bold'>Cola y caché</div><div style='font-size: 70%; margin-top: 0px'>[Container: Redis]</div><div style='font-size: 80%; margin-top:10px'>Cola de tareas de Celery y<br />caché del catálogo. [QA08-01,<br />QA08-03]</div>"]
+      style 16 fill:#438dd5,stroke:#2e6295,color:#ffffff
+      5["<div style='font-weight: bold'>Aplicación web progresiva</div><div style='font-size: 70%; margin-top: 0px'>[Container: HTML/CSS/JavaScript + Service Worker]</div><div style='font-size: 80%; margin-top:10px'>Interfaz móvil para clientes,<br />comerciantes y repartidores;<br />solo por HTTPS. [QA08-01,<br />QA08-06]</div>"]
       style 5 fill:#438dd5,stroke:#2e6295,color:#ffffff
-      6["<div style='font-weight: bold'>Aplicación web / API</div><div style='font-size: 70%; margin-top: 0px'>[Container: Python / Django (HTTP/JSON)]</div><div style='font-size: 80%; margin-top:10px'>Monolito modular que procesa<br />las operaciones del sistema<br />mediante interfaces públicas.</div>"]
+      6["<div style='font-weight: bold'>Aplicación web / API</div><div style='font-size: 70%; margin-top: 0px'>[Container: Python / Django (HTTP/JSON)]</div><div style='font-size: 80%; margin-top:10px'>Monolito modular (ADR-001);<br />filtra por mercado_id de la<br />sesión, cobra con clave de<br />idempotencia y lee las reglas<br />de cada mercado. [QA08-01,<br />QA08-02, QA08-04, QA08-05,<br />QA08-07]</div>"]
       style 6 fill:#438dd5,stroke:#2e6295,color:#ffffff
     end
 
@@ -34,12 +34,14 @@ graph LR
     2-. "<div>Gestiona su puesto</div><div style='font-size: 70%'>[HTTPS]</div>" .->5
     3-. "<div>Consulta y actualiza entregas</div><div style='font-size: 70%'>[HTTPS]</div>" .->5
     5-. "<div>Envía solicitudes y recibe<br />respuestas</div><div style='font-size: 70%'>[HTTPS/JSON]</div>" .->6
-    6-. "<div>Lee y registra datos de<br />negocio</div><div style='font-size: 70%'>[SQL/TCP]</div>" .->14
-    6-. "<div>Encola notificaciones y<br />utiliza caché</div><div style='font-size: 70%'>[Protocolo Redis/TCP]</div>" .->15
-    13-. "<div>Consume tareas y registra<br />reintentos</div><div style='font-size: 70%'>[Protocolo Redis/TCP]</div>" .->15
-    13-. "<div>Envía mensajes y<br />confirmaciones</div><div style='font-size: 70%'>[HTTPS/JSON]</div>" .->17
-    6-. "<div>Solicita cobros mediante el<br />adaptador Yape</div><div style='font-size: 70%'>[HTTPS/JSON]</div>" .->16
-    13-. "<div>Ejecuta tareas del módulo<br />Notificaciones</div><div style='font-size: 70%'>[Celery/Python]</div>" .->6
-    6-. "<div>Envía notificaciones del<br />pedido</div><div style='font-size: 70%'>[HTTPS/JSON]</div>" .->17
+    6-. "<div>Lee y registra datos de<br />negocio</div><div style='font-size: 70%'>[SQL/TCP]</div>" .->15
+    6-. "<div>Encola notificaciones y<br />utiliza caché</div><div style='font-size: 70%'>[Protocolo Redis/TCP]</div>" .->16
+    14-. "<div>Consume tareas y registra<br />reintentos</div><div style='font-size: 70%'>[Protocolo Redis/TCP]</div>" .->16
+    14-. "<div>Envía mensajes y<br />confirmaciones</div><div style='font-size: 70%'>[HTTPS/JSON]</div>" .->18
+    6-. "<div>Solicita cobros con clave de<br />idempotencia [QA08-04]</div><div style='font-size: 70%'>[HTTPS/JSON]</div>" .->17
+    14-. "<div>Lee y actualiza intentos_pago<br />en PENDIENTE [QA08-04]</div><div style='font-size: 70%'>[SQL/TCP]</div>" .->15
+    14-. "<div>Consulta el estado de cobros<br />pendientes por clave<br />[QA08-04]</div><div style='font-size: 70%'>[HTTPS/JSON]</div>" .->17
+    14-. "<div>Ejecuta tareas del módulo<br />Notificaciones</div><div style='font-size: 70%'>[Celery/Python]</div>" .->6
+    6-. "<div>Envía notificaciones del<br />pedido</div><div style='font-size: 70%'>[HTTPS/JSON]</div>" .->18
 
   end

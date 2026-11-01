@@ -1,28 +1,29 @@
-workspace "San Camilo en Línea" "Modelo C4 (E1-E6, Laboratorio 06). Arquitectura completa." {
+workspace "San Camilo en Línea" "Modelo C4 (Laboratorio 06) actualizado en el Laboratorio 08 con ADR-006 a ADR-008 y trazabilidad a escenarios [QA08-xx]." {
 
     !identifiers hierarchical
 
     model {
         // E1: Personas y sistemas (Contexto)
         cliente = person "Cliente" "Consulta productos, compra en varios puestos y paga un pedido único."
-        comerciante = person "Comerciante" "Administra productos y prepara los pedidos de su puesto."
+        comerciante = person "Comerciante" "Administra productos y prepara los pedidos de su puesto en uno de los tres mercados."
         repartidor = person "Repartidor" "Consulta pedidos de delivery y actualiza su entrega."
 
-        sancamilo = softwareSystem "San Camilo en Línea" "Plataforma de compras del Mercado San Camilo: catálogo, pedidos multipuesto, pago y entrega." {
+        sancamilo = softwareSystem "San Camilo en Línea" "Plataforma de compras de los mercados San Camilo, Altiplano y Río Seco: catálogo, pedidos multipuesto, pago y entrega." {
             // E2: Contenedores
-            pwa = container "Aplicación web progresiva" "Interfaz móvil para clientes, comerciantes y repartidores." "HTML/CSS/JavaScript + Service Worker" "Web Browser"
-            api = container "Aplicación web / API" "Monolito modular que procesa las operaciones del sistema mediante interfaces públicas." "Python / Django (HTTP/JSON)" {
+            pwa = container "Aplicación web progresiva" "Interfaz móvil para clientes, comerciantes y repartidores; solo por HTTPS. [QA08-01, QA08-06]" "HTML/CSS/JavaScript + Service Worker" "Web Browser"
+            api = container "Aplicación web / API" "Monolito modular (ADR-001); filtra por mercado_id de la sesión, cobra con clave de idempotencia y lee las reglas de cada mercado. [QA08-01, QA08-02, QA08-04, QA08-05, QA08-07]" "Python / Django (HTTP/JSON)" {
                 // E3: Componentes internos
-                catalogo = component "Catálogo" "Gestiona puestos, productos, disponibilidad y stock." "Módulo Python/Django"
-                pedidos = component "Pedidos" "Carrito, pago de pedido multipuesto, Pedido y PedidoPuesto; dueño del puerto Notificador." "Módulo Python/Django"
-                pagos = component "Pagos" "Gestiona cobros mediante la interfaz PasarelaPago y el adaptador Yape." "Módulo Python/Django"
-                notificaciones = component "Notificaciones" "Implementa Notificador y coordina el envío de avisos al comerciante." "Módulo Python/Django"
-                entrega = component "Entrega" "Gestiona recojo, delivery y actualización del estado de PedidoPuesto." "Módulo Python/Django"
+                catalogo = component "Catálogo" "Gestiona puestos, productos, disponibilidad y stock por mercado. [QA08-01, QA08-07]" "Módulo Python/Django"
+                pedidos = component "Pedidos" "Carrito, pedido multipuesto, Pedido y PedidoPuesto; dueño del puerto Notificador; toda consulta usa WHERE id = ? AND mercado_id = ? (ADR-006). [QA08-02, QA08-05]" "Módulo Python/Django"
+                pagos = component "Pagos" "Cobra mediante PuertoPago y el adaptador Yape; Decorator idempotente con registro PENDIENTE y consulta antes de reintentar (ADR-007). [QA08-04]" "Módulo Python/Django"
+                notificaciones = component "Notificaciones" "Implementa Notificador y coordina el envío asíncrono de avisos al comerciante (ADR-003). [QA08-03]" "Módulo Python/Django"
+                entrega = component "Entrega" "Gestiona recojo, delivery y estado de PedidoPuesto según las reglas del mercado. [QA08-07]" "Módulo Python/Django"
+                mercados = component "Mercados" "Reglas comerciales de cada mercado cargadas desde mercados.json; único punto de entrada RegistroMercados (ADR-008). [QA08-07, QA08-08]" "Módulo Python + JSON"
                 compartido = component "Compartido" "Tipos, identificadores y utilidades sin dependencias de los módulos de negocio." "Módulo Python/Django"
             }
-            worker = container "Worker de notificaciones" "Ejecuta tareas asíncronas y reintentos sin bloquear el pago." "Python / Celery"
-            bd = container "Base de datos relacional" "Guarda clientes, puestos, productos, pedidos y pagos." "PostgreSQL 16" "Database"
-            redis = container "Cola y caché" "Gestiona la cola de tareas de Celery y el caché." "Redis" "Queue"
+            worker = container "Worker de notificaciones y conciliación" "Reintenta avisos sin bloquear el pago y concilia cada 5 min los cobros en PENDIENTE (ADR-007). [QA08-03, QA08-04]" "Python / Celery"
+            bd = container "Base de datos relacional" "Una sola base para los tres mercados: tablas con mercado_id (ADR-006) e intentos_pago con clave de idempotencia (ADR-007). [QA08-04, QA08-05]" "PostgreSQL 16" "Database"
+            redis = container "Cola y caché" "Cola de tareas de Celery y caché del catálogo. [QA08-01, QA08-03]" "Redis" "Queue"
         }
 
         pasarela = softwareSystem "Pasarela de pago Yape" "Proveedor externo utilizado mediante la interfaz PasarelaPago; integración abstracta en el MVP." "Externo"
@@ -44,7 +45,9 @@ workspace "San Camilo en Línea" "Modelo C4 (E1-E6, Laboratorio 06). Arquitectur
         sancamilo.api -> sancamilo.redis "Encola notificaciones y utiliza caché" "Protocolo Redis/TCP"
         sancamilo.worker -> sancamilo.redis "Consume tareas y registra reintentos" "Protocolo Redis/TCP"
         sancamilo.worker -> whatsapp "Envía mensajes y confirmaciones" "HTTPS/JSON"
-        sancamilo.api -> pasarela "Solicita cobros mediante el adaptador Yape" "HTTPS/JSON"
+        sancamilo.api -> pasarela "Solicita cobros con clave de idempotencia [QA08-04]" "HTTPS/JSON"
+        sancamilo.worker -> sancamilo.bd "Lee y actualiza intentos_pago en PENDIENTE [QA08-04]" "SQL/TCP"
+        sancamilo.worker -> pasarela "Consulta el estado de cobros pendientes por clave [QA08-04]" "HTTPS/JSON"
 
         // E3: Relaciones entre Componentes
         sancamilo.pwa -> sancamilo.api.catalogo "Consulta productos y puestos" "HTTPS/JSON"
@@ -65,7 +68,11 @@ workspace "San Camilo en Línea" "Modelo C4 (E1-E6, Laboratorio 06). Arquitectur
         sancamilo.worker -> sancamilo.api.notificaciones "Ejecuta tareas del módulo Notificaciones" "Celery/Python"
         sancamilo.api.notificaciones -> whatsapp "Envía notificaciones del pedido" "HTTPS/JSON"
         sancamilo.api.catalogo -> sancamilo.bd "Lee productos y stock" "SQL/TCP"
-        sancamilo.api.pedidos -> sancamilo.bd "Guarda pedidos y estados" "SQL/TCP"
+        sancamilo.api.pedidos -> sancamilo.bd "Guarda pedidos y estados filtrados por mercado_id [QA08-05]" "SQL/TCP"
+        sancamilo.api.pagos -> sancamilo.bd "Registra intentos_pago antes de cobrar [QA08-04]" "SQL/TCP"
+        sancamilo.api.pedidos -> sancamilo.api.mercados "Valida monto mínimo y horario del mercado [QA08-07]" "Llamada interna Python"
+        sancamilo.api.catalogo -> sancamilo.api.mercados "Consulta el horario del mercado [QA08-07]" "Llamada interna Python"
+        sancamilo.api.entrega -> sancamilo.api.mercados "Consulta si hay delivery y su costo [QA08-07]" "Llamada interna Python"
 
         // E5: Entorno de Despliegue
         produccion = deploymentEnvironment "Producción" {
@@ -89,7 +96,7 @@ workspace "San Camilo en Línea" "Modelo C4 (E1-E6, Laboratorio 06). Arquitectur
             include *
             autolayout lr
         }
-        container sancamilo "Contenedores" "Nivel 2: PWA, aplicación modular, worker, base de datos y Redis." {
+        container sancamilo "Contenedores" "Nivel 2 (Lab 08): contenedores con los escenarios que atiende cada uno [QA08-xx]." {
             include *
             autolayout lr
         }

@@ -1,0 +1,38 @@
+digraph arbol_utilidad {
+graph [rankdir=LR, bgcolor="#FFFFFF", pad="0.35", nodesep="0.27", ranksep="0.78", splines=polyline, outputorder=edgesfirst, dpi=180, fontname="DejaVu Sans"];
+node [shape=box, style="rounded,filled", fontname="DejaVu Sans", fontsize=12, color="#C7D0DE", penwidth=1.25, margin="0.18,0.12"];
+edge [color="#97A4B5", arrowsize=0.65, penwidth=1.45];
+utilidad [label="UTILIDAD\nSan Camilo en Línea\n(3 mercados)", fillcolor="#162942", fontcolor="white", color="#162942", fontsize=19, penwidth=2, margin="0.27,0.20"];
+attr0 [label="Rendimiento", fillcolor="#DCEBFC", color="#2A5CA0", fontcolor="#2A5CA0", fontsize=15, penwidth=2, margin="0.21,0.17"];
+ref0 [label="Consultas y compras", fillcolor="#F2F8FF", color="#2A5CA0", fontsize=12];
+utilidad -> attr0 [color="#2A5CA0"]; attr0 -> ref0 [color="#2A5CA0"];
+leaf_01 [label="QA08-01   (H,M)\nConsulta de catálogo\np95 <= 2 s\n12 consultas/s", fillcolor="#F2F8FF", color="#2A5CA0", fontsize=11, penwidth=1.5, width=3.12];
+ref0 -> leaf_01 [color="#2A5CA0"];
+leaf_02 [label="QA08-02   (M,M)\nConfirmación de compra\np95 <= 3 s\n5 confirmaciones/s", fillcolor="#F2F8FF", color="#2A5CA0", fontsize=11, penwidth=1.5, width=3.12];
+ref0 -> leaf_02 [color="#2A5CA0"];
+attr1 [label="Disponibilidad", fillcolor="#DCF5E9", color="#23774D", fontcolor="#23774D", fontsize=15, penwidth=2, margin="0.21,0.17"];
+ref1 [label="Continuidad del pedido", fillcolor="#F2FBF6", color="#23774D", fontsize=12];
+utilidad -> attr1 [color="#23774D"]; attr1 -> ref1 [color="#23774D"];
+leaf_03 [label="QA08-03   (H,M)\nNotificaciones resilientes\n0 pedidos perdidos\nreintento <= 10 min", fillcolor="#F2FBF6", color="#23774D", fontsize=11, penwidth=1.5, width=3.12];
+ref1 -> leaf_03 [color="#23774D"];
+leaf_04 [label="QA08-04   (H,H)\nCobros sin duplicados\n0 dobles cobros\nen 100 intentos", fillcolor="#F2FBF6", color="#23774D", fontsize=11, penwidth=1.5, width=3.12];
+ref1 -> leaf_04 [color="#23774D"];
+attr2 [label="Seguridad", fillcolor="#FDE9E4", color="#AD4D3C", fontcolor="#AD4D3C", fontsize=15, penwidth=2, margin="0.21,0.17"];
+ref2 [label="Protección entre mercados", fillcolor="#FFF6F2", color="#AD4D3C", fontsize=12];
+utilidad -> attr2 [color="#AD4D3C"]; attr2 -> ref2 [color="#AD4D3C"];
+leaf_05 [label="QA08-05   (H,H)\nAislamiento entre mercados\n0 accesos indebidos\nen 100 intentos", fillcolor="#FFF6F2", color="#AD4D3C", fontsize=11, penwidth=1.5, width=3.12];
+ref2 -> leaf_05 [color="#AD4D3C"];
+leaf_06 [label="QA08-06   (M,M)\nConfidencialidad y registros\n100% HTTPS\n0 datos en logs", fillcolor="#FFF6F2", color="#AD4D3C", fontsize=11, penwidth=1.5, width=3.12];
+ref2 -> leaf_06 [color="#AD4D3C"];
+attr3 [label="Modificabilidad", fillcolor="#EFE4FC", color="#7554AB", fontcolor="#7554AB", fontsize=15, penwidth=2, margin="0.21,0.17"];
+ref3 [label="Incorporación y reglas", fillcolor="#F8F4FF", color="#7554AB", fontsize=12];
+utilidad -> attr3 [color="#7554AB"]; attr3 -> ref3 [color="#7554AB"];
+leaf_07 [label="QA08-07   (H,H)\nAlta de mercados\n<= 2 días/mercado\n<= 2 módulos modificados", fillcolor="#F8F4FF", color="#7554AB", fontsize=11, penwidth=1.5, width=3.12];
+ref3 -> leaf_07 [color="#7554AB"];
+leaf_08 [label="QA08-08   (H,M)\nCambios de reglas locales\n<= 1 día\n100% pruebas aprobadas", fillcolor="#F8F4FF", color="#7554AB", fontsize=11, penwidth=1.5, width=3.12];
+ref3 -> leaf_08 [color="#7554AB"];
+{rank=same; attr0; attr1; attr2; attr3;}
+{rank=same; ref0; ref1; ref2; ref3;}
+lab [label="H = Alta    M = Media    L = Baja\n(Importancia, dificultad)   •   Objetivos por validar", shape=note, fillcolor="#F3F5F8", color="#C9D1DB", fontcolor="#374151", fontsize=10];
+leaf_08 -> lab [style=invis];
+}

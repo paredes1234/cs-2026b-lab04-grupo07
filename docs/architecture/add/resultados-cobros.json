@@ -1,0 +1,120 @@
+{
+  "semilla": 2026,
+  "lote": [
+    {
+      "tactica": "reintentos",
+      "pedidos": 100,
+      "timeouts_primer_intento": 10,
+      "confirmados": 100,
+      "cobros_duplicados": 8,
+      "cobros_huerfanos": 0,
+      "pendientes_conciliacion": 0
+    },
+    {
+      "tactica": "sin_reintento",
+      "pedidos": 100,
+      "timeouts_primer_intento": 10,
+      "confirmados": 90,
+      "cobros_duplicados": 0,
+      "cobros_huerfanos": 6,
+      "pendientes_conciliacion": 0
+    },
+    {
+      "tactica": "idempotente",
+      "pedidos": 100,
+      "timeouts_primer_intento": 10,
+      "confirmados": 100,
+      "cobros_duplicados": 0,
+      "cobros_huerfanos": 0,
+      "pendientes_conciliacion": 0
+    }
+  ],
+  "montecarlo": [
+    {
+      "tactica": "reintentos",
+      "corridas": 1000,
+      "duplicados_promedio": 5.519,
+      "duplicados_p95": 8,
+      "duplicados_max": 11,
+      "corridas_con_duplicados": 1000,
+      "huerfanos_promedio": 0.091,
+      "pendientes_promedio": 0.0
+    },
+    {
+      "tactica": "sin_reintento",
+      "corridas": 1000,
+      "duplicados_promedio": 0.0,
+      "duplicados_p95": 0,
+      "duplicados_max": 0,
+      "corridas_con_duplicados": 0,
+      "huerfanos_promedio": 4.962,
+      "pendientes_promedio": 0.0
+    },
+    {
+      "tactica": "idempotente",
+      "corridas": 1000,
+      "duplicados_promedio": 0.0,
+      "duplicados_p95": 0,
+      "duplicados_max": 0,
+      "corridas_con_duplicados": 0,
+      "huerfanos_promedio": 0.0,
+      "pendientes_promedio": 0.011
+    }
+  ],
+  "sensibilidad_p_tardio": {
+    "reintentos": [
+      {
+        "p_tardio": 0.0,
+        "duplicados_promedio": 0.0,
+        "duplicados_max": 0
+      },
+      {
+        "p_tardio": 0.25,
+        "duplicados_promedio": 2.82,
+        "duplicados_max": 7
+      },
+      {
+        "p_tardio": 0.5,
+        "duplicados_promedio": 5.52,
+        "duplicados_max": 9
+      },
+      {
+        "p_tardio": 0.75,
+        "duplicados_promedio": 8.285,
+        "duplicados_max": 12
+      },
+      {
+        "p_tardio": 1.0,
+        "duplicados_promedio": 11.07,
+        "duplicados_max": 14
+      }
+    ],
+    "idempotente": [
+      {
+        "p_tardio": 0.0,
+        "duplicados_promedio": 0.0,
+        "duplicados_max": 0
+      },
+      {
+        "p_tardio": 0.25,
+        "duplicados_promedio": 0.0,
+        "duplicados_max": 0
+      },
+      {
+        "p_tardio": 0.5,
+        "duplicados_promedio": 0.0,
+        "duplicados_max": 0
+      },
+      {
+        "p_tardio": 0.75,
+        "duplicados_promedio": 0.0,
+        "duplicados_max": 0
+      },
+      {
+        "p_tardio": 1.0,
+        "duplicados_promedio": 0.0,
+        "duplicados_max": 0
+      }
+    ]
+  }
+}
