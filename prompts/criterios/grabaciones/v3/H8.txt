@@ -1,0 +1,9 @@
+{
+  "historia_id": "H8",
+  "invest_ok": false,
+  "preguntas": [
+    "¿Qué necesidad funcional del cliente, comerciante o repartidor motiva esta historia?",
+    "¿Qué problema observable del negocio (por ejemplo, demora al consultar el historial de pedidos) se busca resolver?"
+  ],
+  "escenarios": []
+}

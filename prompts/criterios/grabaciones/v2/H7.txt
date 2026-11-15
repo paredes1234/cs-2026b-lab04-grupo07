@@ -1,0 +1,29 @@
+{
+  "historia_id": "H7",
+  "invest_ok": true,
+  "preguntas": [],
+  "escenarios": [
+    {
+      "titulo": "Carga rápida de la aplicación para el comerciante",
+      "tipo": "exito",
+      "dado": [
+        "que el comerciante abre la aplicación desde su celular"
+      ],
+      "cuando": "navega por las secciones de su puesto",
+      "entonces": [
+        "las pantallas responden de manera rápida y con botones fáciles de entender"
+      ]
+    },
+    {
+      "titulo": "Navegación en conexión móvil lenta",
+      "tipo": "borde",
+      "dado": [
+        "que el comerciante tiene señal móvil limitada en el mercado"
+      ],
+      "cuando": "abre su lista de productos",
+      "entonces": [
+        "la interfaz mantiene su usabilidad sin bloquearse"
+      ]
+    }
+  ]
+}

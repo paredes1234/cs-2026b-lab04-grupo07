@@ -1,0 +1,31 @@
+{
+  "historia_id": "H3",
+  "invest_ok": true,
+  "preguntas": [],
+  "escenarios": [
+    {
+      "titulo": "Pago consolidado con Yape para pedido de varios puestos",
+      "tipo": "exito",
+      "dado": [
+        "que el cliente tiene en su carrito productos del puesto de verduras por S/ 15.00 y del puesto de carnes por S/ 25.00"
+      ],
+      "cuando": "confirma el pedido y realiza un único pago de S/ 40.00 mediante Yape",
+      "entonces": [
+        "el sistema confirma el pedido consolidado",
+        "genera las órdenes correspondientes para cada puesto sin requerir pagos separados"
+      ]
+    },
+    {
+      "titulo": "Pago con Yape rechazado o cancelado",
+      "tipo": "error",
+      "dado": [
+        "que el cliente tiene un pedido armado con productos de dos puestos por S/ 32.00"
+      ],
+      "cuando": "intenta pagar con Yape y la operación es rechazada",
+      "entonces": [
+        "el pedido permanece en estado pendiente de pago",
+        "se muestra un mensaje indicando que el pago no pudo completarse para que pueda reintentarlo"
+      ]
+    }
+  ]
+}

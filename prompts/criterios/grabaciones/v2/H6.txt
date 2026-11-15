@@ -1,0 +1,30 @@
+{
+  "historia_id": "H6",
+  "invest_ok": true,
+  "preguntas": [],
+  "escenarios": [
+    {
+      "titulo": "Visualización y marcado de pedido como entregado",
+      "tipo": "exito",
+      "dado": [
+        "que el repartidor tiene asignado el pedido #104 en estado \"En camino\""
+      ],
+      "cuando": "presiona el botón \"Marcar como entregado\" tras entregar los productos al cliente",
+      "entonces": [
+        "el sistema actualiza el estado del pedido en la base de datos a \"Entregado\"",
+        "el cliente y el mercado visualizan el nuevo estado"
+      ]
+    },
+    {
+      "titulo": "Repartidor sin pedidos asignados",
+      "tipo": "borde",
+      "dado": [
+        "que el repartidor no tiene entregas de delivery asignadas en su turno"
+      ],
+      "cuando": "accede a su lista de pedidos asignados",
+      "entonces": [
+        "se muestra el mensaje \"No tienes pedidos de delivery asignados por el momento\""
+      ]
+    }
+  ]
+}

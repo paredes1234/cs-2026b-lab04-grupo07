@@ -1,0 +1,29 @@
+{
+  "historia_id": "H8",
+  "invest_ok": true,
+  "preguntas": [],
+  "escenarios": [
+    {
+      "titulo": "Persistencia de pedidos en PostgreSQL normalizado",
+      "tipo": "exito",
+      "dado": [
+        "que la base de datos PostgreSQL cuenta con tablas normalizadas e índices configurados"
+      ],
+      "cuando": "se registra un nuevo pedido en el sistema",
+      "entonces": [
+        "los registros se insertan en las tablas correspondientes respetando la integridad referencial"
+      ]
+    },
+    {
+      "titulo": "Error de integridad en la base de datos",
+      "tipo": "error",
+      "dado": [
+        "que se intenta guardar un pedido con un identificador de puesto inexistente"
+      ],
+      "cuando": "se ejecuta la inserción en PostgreSQL",
+      "entonces": [
+        "la base de datos rechaza la operación y revierte la transacción"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,30 @@
+{
+  "historia_id": "H9",
+  "invest_ok": true,
+  "preguntas": [],
+  "escenarios": [
+    {
+      "titulo": "Filtrado del catálogo por categoría",
+      "tipo": "exito",
+      "dado": [
+        "que el catálogo contiene productos de las categorías \"verduras\", \"lácteos\" y \"carnes\""
+      ],
+      "cuando": "el cliente selecciona el filtro de categoría \"verduras\"",
+      "entonces": [
+        "se muestran únicamente los productos pertenecientes a la categoría \"verduras\"",
+        "se ocultan los productos de \"lácteos\" y \"carnes\""
+      ]
+    },
+    {
+      "titulo": "Filtro por categoría sin productos disponibles",
+      "tipo": "borde",
+      "dado": [
+        "que actualmente no hay productos publicados en la categoría \"carnes\""
+      ],
+      "cuando": "el cliente filtra el catálogo por \"carnes\"",
+      "entonces": [
+        "ve el mensaje \"No se encontraron productos en la categoría seleccionada\""
+      ]
+    }
+  ]
+}

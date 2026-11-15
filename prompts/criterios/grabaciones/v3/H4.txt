@@ -1,0 +1,42 @@
+{
+  "historia_id": "H4",
+  "invest_ok": true,
+  "preguntas": [],
+  "escenarios": [
+    {
+      "titulo": "Confirmación con recojo en el mercado",
+      "tipo": "exito",
+      "dado": [
+        "que el cliente revisa el resumen de su pedido antes de confirmar"
+      ],
+      "cuando": "elige la opción \"Recojo en el mercado\" y confirma su pedido",
+      "entonces": [
+        "el total del pedido no incluye cargo por envío",
+        "se muestra la confirmación con la modalidad \"Recojo en el mercado\" y el punto de entrega"
+      ]
+    },
+    {
+      "titulo": "Confirmación con entrega por delivery",
+      "tipo": "exito",
+      "dado": [
+        "que el cliente revisa el resumen de su pedido antes de confirmar"
+      ],
+      "cuando": "elige \"Entrega por delivery\", ingresa una dirección válida en Arequipa y confirma",
+      "entonces": [
+        "el pedido queda registrado con modalidad \"Entrega por delivery\" en la dirección indicada"
+      ]
+    },
+    {
+      "titulo": "Intento de confirmar sin seleccionar modalidad",
+      "tipo": "borde",
+      "dado": [
+        "que el cliente está en la pantalla de confirmación sin haber seleccionado recojo ni delivery"
+      ],
+      "cuando": "intenta confirmar el pedido",
+      "entonces": [
+        "el pedido no se confirma",
+        "ve el mensaje \"Selecciona recojo en el mercado o entrega por delivery para continuar\""
+      ]
+    }
+  ]
+}

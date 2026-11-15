@@ -1,0 +1,29 @@
+{
+  "historia_id": "H2",
+  "invest_ok": true,
+  "preguntas": [],
+  "escenarios": [
+    {
+      "titulo": "Consulta del catálogo de un puesto con productos",
+      "tipo": "exito",
+      "dado": [
+        "que el puesto \"Jugos Doña Rosa\" tiene productos disponibles en el catálogo"
+      ],
+      "cuando": "el cliente selecciona el puesto \"Jugos Doña Rosa\" en el catálogo",
+      "entonces": [
+        "se muestran únicamente los productos de ese puesto con su nombre, precio y disponibilidad"
+      ]
+    },
+    {
+      "titulo": "Consulta de un puesto sin productos registrados",
+      "tipo": "borde",
+      "dado": [
+        "que el puesto \"Abarrotes Don Pedro\" aún no tiene productos publicados"
+      ],
+      "cuando": "el cliente ingresa a la sección de ese puesto",
+      "entonces": [
+        "se muestra el mensaje \"Este puesto aún no tiene productos disponibles\""
+      ]
+    }
+  ]
+}

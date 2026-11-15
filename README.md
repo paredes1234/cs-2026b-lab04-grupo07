@@ -238,4 +238,6 @@ Tarea A: generar criterios de aceptación Gherkin en JSON a partir de historias 
 
 | Versión | Cambio | Casos aprobados | Tasa |
 |---|---|---:|---:|
-| v1 | Prompt ingenuo (línea base) | [X]/9 | [Z] % |
+| v1 | Prompt ingenuo (línea base) | 0/9 | 0.0 % |
+| v2 | Rol, contexto, formato JSON y datos | 3/9 | 33.3 % |
+| v3 | Restricciones, delimitadores y ejemplo (few-shot) | 9/9 | 100.0 % |
