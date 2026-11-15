@@ -1,0 +1,6 @@
+Criterios de aceptación:
+
+1. Los pedidos se almacenan en una base de datos relacional PostgreSQL siguiendo al menos la Tercera Forma Normal (3FN), separando tablas para pedidos, detalle_pedidos, productos, puestos y usuarios.
+2. Existen claves primarias y foráneas debidamente definidas para garantizar la integridad referencial entre pedidos y puestos.
+3. Se crean índices en las columnas de consulta frecuente (como cliente_id, puesto_id, estado y fecha_creacion) para optimizar el tiempo de respuesta de las consultas SQL.
+4. Las operaciones de inserción de un pedido y actualización de stock se ejecutan dentro de una transacción ACID.

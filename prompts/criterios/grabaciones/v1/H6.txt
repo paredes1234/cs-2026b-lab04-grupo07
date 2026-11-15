@@ -1,0 +1,7 @@
+Criterios de aceptación:
+
+1. El repartidor puede acceder a una vista con la lista de pedidos de delivery que tiene asignados.
+2. Cada pedido muestra el código de orden, los puestos donde debe recoger los productos, la dirección de entrega y el estado actual (ej. "En camino", "Entregado").
+3. El repartidor dispone de un botón o acción para marcar un pedido asignado como "Entregado".
+4. Al marcarlo como entregado, el estado se actualiza en tiempo real en la base de datos y se notifica tanto al cliente como al administrador del mercado.
+5. Un repartidor no puede visualizar ni modificar el estado de pedidos asignados a otros repartidores.

@@ -231,3 +231,11 @@ Escenario de crecimiento: se suman los mercados Altiplano y Río Seco, cada uno 
 - [ADR-006: Aislamiento de datos entre mercados mediante filtro mercado_id](docs/architecture/adr/006-aislamiento-datos.md) · [ADR-007: Cobros idempotentes con registro PENDIENTE](docs/architecture/adr/007-cobro-idempotente.md) · [ADR-008: Alta de mercados mediante reglas como datos](docs/architecture/adr/008-alta-mercados.md)
 - [Evaluación ATAM-lite](docs/architecture/atam-lite.md) · [Bitácora de IA](docs/architecture/bitacora-ia.md)
 - Fitness functions: [`.importlinter`](.importlinter) (FF-01 a FF-03) y [`tests/test_fitness.py`](tests/test_fitness.py) (FF-04 a FF-07)
+
+## Prompt engineering (Lab 09)
+
+Tarea A: generar criterios de aceptación Gherkin en JSON a partir de historias de usuario. Se evalúa con promptfoo sobre respuestas grabadas (sin clave de API).
+
+| Versión | Cambio | Casos aprobados | Tasa |
+|---|---|---:|---:|
+| v1 | Prompt ingenuo (línea base) | [X]/9 | [Z] % |

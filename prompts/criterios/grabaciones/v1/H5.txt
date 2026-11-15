@@ -1,0 +1,7 @@
+Criterios de aceptación:
+
+1. Cuando un cliente completa el pago de un pedido, el sistema envía automáticamente un mensaje de WhatsApp al número registrado del comerciante.
+2. El mensaje incluye el identificador del pedido, la lista de productos solicitados correspondientes a ese puesto, sus cantidades y la modalidad de entrega (recojo o delivery).
+3. El envío de la notificación se realiza a través de la API de WhatsApp dentro de los primeros segundos tras confirmarse el pago.
+4. Si el pedido incluye productos de varios puestos, cada comerciante recibe únicamente el detalle de los productos de su propio puesto.
+5. En caso de error en el envío por WhatsApp, el sistema registra el fallo para reintento y muestra el pedido pendiente en el panel del comerciante.

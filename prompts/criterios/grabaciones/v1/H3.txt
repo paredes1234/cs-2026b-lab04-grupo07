@@ -1,0 +1,7 @@
+Criterios de aceptación:
+
+1. El cliente puede agregar al mismo carrito de compras productos pertenecientes a dos o más puestos distintos.
+2. El carrito muestra el detalle de los productos agrupados o identificados por puesto, junto con el monto total consolidado del pedido.
+3. Al proceder al pago, el sistema permite realizar una única transacción mediante Yape por el monto total del pedido.
+4. Una vez confirmado el pago con Yape, el sistema genera el pedido general y distribuye automáticamente las órdenes correspondientes a cada puesto involucrado.
+5. Si el pago con Yape falla o es cancelado, el pedido no se confirma y el cliente recibe una notificación para reintentar el pago.

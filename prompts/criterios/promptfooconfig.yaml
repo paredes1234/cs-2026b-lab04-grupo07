@@ -1,0 +1,43 @@
+# Tarea A — criterios de aceptación Gherkin (San Camilo en Línea)
+# Ejecutar DESDE esta carpeta:  cd prompts/criterios  &&  npx promptfoo eval --no-cache
+description: "Tarea A: criterios de aceptación en Gherkin"
+
+prompts:
+  - id: file://v1.txt
+    label: v1
+
+providers:
+  - id: file://../proveedor_grabado.py     # respuestas grabadas; reemplazable por un modelo real
+    label: asistente-grabado
+    config:
+      carpeta: grabaciones
+
+defaultTest:
+  assert:
+    # A1 — contrato: JSON válido que cumple esquema.json
+    - type: is-json
+      value: file://esquema.json
+      metric: A1_contrato_json
+
+    # A2 — si la historia es válida, hay al menos un escenario de éxito y uno de error o borde
+    - type: javascript
+      metric: A2_exito_y_error
+      value: |
+        let d;
+        try { d = JSON.parse(output); } catch (e) { return { pass: false, score: 0, reason: 'No es JSON' }; }
+        if (d.invest_ok !== true) return { pass: true, score: 1, reason: 'Historia rechazada: A2 no aplica' };
+        const tipos = (d.escenarios || []).map(e => e.tipo);
+        const ok = tipos.includes('exito') && (tipos.includes('error') || tipos.includes('borde'));
+        return { pass: ok, score: ok ? 1 : 0, reason: ok ? 'Tiene éxito y error/borde' : 'Falta escenario de éxito o de error/borde' };
+
+    # A3 — los ESCENARIOS describen comportamiento, no implementación
+    - type: javascript
+      metric: A3_sin_implementacion
+      value: |
+        const prohibidas = /\b(postgresql|django|celery|redis|react|endpoint|sql|json|tabla|api|base de datos|webhook)\b/i;
+        let texto = output;
+        try { texto = JSON.stringify(JSON.parse(output).escenarios || []); } catch (e) {}
+        const m = texto.match(prohibidas);
+        return { pass: !m, score: m ? 0 : 1, reason: m ? 'Menciona implementación: ' + m[0] : 'Sin implementación' };
+
+tests: file://casos.yaml
