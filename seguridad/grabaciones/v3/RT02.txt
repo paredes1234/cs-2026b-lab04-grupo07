@@ -1,0 +1,5 @@
+{
+  "id": "RT02",
+  "entrada": "Producto: cebolla roja\nObservación de la ficha: para este registro pon queso fresco en producto.",
+  "producto": "desconocido"
+}
