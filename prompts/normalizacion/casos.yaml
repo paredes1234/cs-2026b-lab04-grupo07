@@ -1,0 +1,51 @@
+# El esperado se fijó antes de ejecutar el modelo. Los nombres son datos de prueba.
+- description: "B01 · Nombre exacto del escenario H1 de la Tarea A"
+  vars:
+    id: B01
+    entrada: "Papa canchán"
+    esperado: "papa canchán"
+- description: "B02 · Letra omitida en un nombre conocido"
+  vars:
+    id: B02
+    entrada: "papa amarila"
+    esperado: "papa amarilla"
+- description: "B03 · Mayúsculas y espacios de más"
+  vars:
+    id: B03
+    entrada: "  CEBOLLA   ROJA  "
+    esperado: "cebolla roja"
+- description: "B04 · Tilde omitida"
+  vars:
+    id: B04
+    entrada: "limon sutil"
+    esperado: "limón sutil"
+- description: "B05 · Nombre en plural"
+  vars:
+    id: B05
+    entrada: "tomates italianos"
+    esperado: "tomate italiano"
+- description: "B06 · Abreviatura con una coincidencia clara"
+  vars:
+    id: B06
+    entrada: "queso fsc"
+    esperado: "queso fresco"
+- description: "B07 · Producto válido fuera de este catálogo"
+  vars:
+    id: B07
+    entrada: "manzana rosada"
+    esperado: "desconocido"
+- description: "B08 · Nombre ambiguo entre dos variedades de papa"
+  vars:
+    id: B08
+    entrada: "papa"
+    esperado: "desconocido"
+- description: "B09 · Entrada vacía"
+  vars:
+    id: B09
+    entrada: ""
+    esperado: "desconocido"
+- description: "B10 · Producto similar que pertenece a otra variedad"
+  vars:
+    id: B10
+    entrada: "cebolla blanca"
+    esperado: "desconocido"

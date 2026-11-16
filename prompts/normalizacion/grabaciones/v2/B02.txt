@@ -1,0 +1,5 @@
+{
+  "id": "B02",
+  "entrada": "papa amarila",
+  "producto": "papa amarilla"
+}

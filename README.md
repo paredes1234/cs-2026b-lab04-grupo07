@@ -241,3 +241,27 @@ Tarea A: generar criterios de aceptación Gherkin en JSON a partir de historias 
 | v1 | Prompt ingenuo (línea base) | 0/9 | 0.0 % |
 | v2 | Rol, contexto, formato JSON y datos | 3/9 | 33.3 % |
 | v3 | Restricciones, delimitadores y ejemplo (few-shot) | 9/9 | 100.0 % |
+
+### Tarea B: normalización de nombres de productos (E4)
+
+El prompt asigna el nombre escrito por el comerciante a un producto del catálogo de prueba o a `desconocido`. El contrato exige `id`, `entrada` y `producto`. Se comprueban cuatro condiciones: JSON válido según el esquema, pertenencia al catálogo o `desconocido`, conservación literal del ID y la entrada, y coincidencia exacta con el resultado esperado del caso.
+
+| Versión | Cambio | Casos aprobados | Tasa |
+|---|---|---:|---:|
+| v1 | Corrección libre del nombre | 0/10 | 0 % |
+| v2 | Catálogo, formato JSON y copia de la entrada | 7/10 | 70 % |
+| v3 | Reglas para nombres genéricos y variedades, ejemplos few-shot y copia literal de la entrada | 9/10 | 90 % |
+
+La v3 corrige B03 (mayúsculas y espacios) y B10 (variedad ausente del catálogo). Persiste B08: `papa` se asignó a `papa canchán`, aunque el catálogo también contiene `papa amarilla`. La pertenencia al catálogo se cumple, pero el resultado esperado es `desconocido`. Una hipótesis es que el modelo eligió una coincidencia por el sustantivo compartido y pasó por alto la falta de variedad.
+
+**Encadenamiento de laboratorio.** Se tomó `Papa canchán` del escenario de publicación exitosa de H1 de la Tarea A (`prompts/criterios/grabaciones/v3/H1.txt`) y se usó como entrada de B01 de la Tarea B. La v3 devolvió `papa canchán`. La transferencia del dato se hizo manualmente al preparar el dataset.
+
+Las 30 respuestas se grabaron sin editar, con una consulta independiente por caso y versión a Qwen2.5-1.5B-Instruct (GGUF Q4_K_M) ejecutado localmente mediante llama.cpp b6766, con temperatura 0, semilla 42 y máximo de 160 tokens. El reporte está en `prompts/normalizacion/resultados.json`. Para repetir la evaluación sobre las mismas respuestas grabadas, desde la raíz del repositorio:
+
+```bash
+cd prompts/normalizacion
+npx --yes promptfoo@0.118.14 eval --no-table --no-cache -o /tmp/lab09-e4-resultados.json
+python ../tasa_por_version.py /tmp/lab09-e4-resultados.json
+```
+
+La primera orden finaliza con código 100 cuando hay casos desaprobados. El resumen general junta las tres versiones (16 de 30) y el script muestra la tasa por versión.

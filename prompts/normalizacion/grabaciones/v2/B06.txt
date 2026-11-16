@@ -1,0 +1,5 @@
+{
+  "id": "B06",
+  "entrada": "queso fsc",
+  "producto": "queso fresco"
+}

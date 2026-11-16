@@ -1,0 +1,12 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Normalización de un producto de San Camilo en Línea",
+  "type": "object",
+  "required": ["id", "entrada", "producto"],
+  "additionalProperties": false,
+  "properties": {
+    "id": {"type": "string", "minLength": 1},
+    "entrada": {"type": "string"},
+    "producto": {"type": "string", "minLength": 1}
+  }
+}
