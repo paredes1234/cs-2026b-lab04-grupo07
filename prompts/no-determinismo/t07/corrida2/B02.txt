@@ -1,0 +1,7 @@
+```json
+{
+  "id": "B02",
+  "entrada": "papa amarilla",
+  "producto": "desconocido"
+}
+```
