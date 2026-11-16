@@ -1,0 +1,7 @@
+Criterios de aceptación:
+
+1. En la pantalla de confirmación del pedido, el cliente visualiza dos opciones claras de entrega: "Recojo en el mercado" y "Entrega por delivery".
+2. El cliente debe seleccionar obligatoriamente una de las dos modalidades antes de finalizar la compra.
+3. Si elige "Recojo en el mercado", no se cobra costo de envío y se muestra el horario y punto de recojo.
+4. Si elige "Entrega por delivery", el sistema solicita la dirección de entrega y suma la tarifa de envío correspondiente al total del pedido.
+5. La modalidad elegida queda registrada en el resumen del pedido confirmado.

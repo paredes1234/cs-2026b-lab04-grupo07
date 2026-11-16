@@ -1,0 +1,31 @@
+```json
+{
+  "historia_id": "H5",
+  "invest_ok": true,
+  "preguntas": [],
+  "escenarios": [
+    {
+      "titulo": "Envío de aviso por WhatsApp al comerciante tras el pago",
+      "tipo": "exito",
+      "dado": [
+        "que un cliente paga un pedido que incluye 2 kilos de tomate del puesto 08"
+      ],
+      "cuando": "el pago es confirmado",
+      "entonces": [
+        "el sistema envía una notificación mediante la API de WhatsApp al comerciante del puesto 08 con el detalle de los 2 kilos de tomate"
+      ]
+    },
+    {
+      "titulo": "Fallo en el envío del aviso de WhatsApp",
+      "tipo": "error",
+      "dado": [
+        "que un pedido pagado contiene productos del puesto 08"
+      ],
+      "cuando": "el servicio de WhatsApp no responde al enviar el mensaje",
+      "entonces": [
+        "el pedido queda visible en el panel del comerciante como pagado y pendiente de preparación"
+      ]
+    }
+  ]
+}
+```

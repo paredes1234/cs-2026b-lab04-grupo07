@@ -1,0 +1,31 @@
+{
+  "historia_id": "H3",
+  "invest_ok": true,
+  "preguntas": [],
+  "escenarios": [
+    {
+      "titulo": "Pago único con Yape para pedido multipuesto",
+      "tipo": "exito",
+      "dado": [
+        "que el cliente armó un pedido con productos del puesto 05 por S/ 18.00 y del puesto 19 por S/ 22.00"
+      ],
+      "cuando": "confirma el pedido y completa un solo pago de S/ 40.00 con Yape",
+      "entonces": [
+        "el pedido queda confirmado en su totalidad con un único comprobante de pago",
+        "cada comerciante recibe la orden correspondiente a los productos de su puesto"
+      ]
+    },
+    {
+      "titulo": "Pago con Yape rechazado o sin confirmación",
+      "tipo": "error",
+      "dado": [
+        "que el cliente tiene un pedido armado con productos de varios puestos por S/ 35.00"
+      ],
+      "cuando": "realiza el intento de pago con Yape y la operación es rechazada",
+      "entonces": [
+        "el pedido no se confirma ni se notifica a los comerciantes",
+        "el cliente visualiza el mensaje \"El pago con Yape no pudo completarse, intenta nuevamente\""
+      ]
+    }
+  ]
+}

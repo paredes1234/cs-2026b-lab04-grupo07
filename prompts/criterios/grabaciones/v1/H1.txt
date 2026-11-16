@@ -1,0 +1,8 @@
+Criterios de aceptación:
+
+1. El comerciante puede acceder a una opción para publicar un nuevo producto en su puesto.
+2. El formulario solicita obligatoriamente el nombre del producto, el precio unitario y la cantidad disponible en stock.
+3. El sistema valida que el precio y la cantidad disponible sean valores numéricos mayores a cero.
+4. Al guardar, el producto queda registrado en la base de datos asociado al puesto del comerciante.
+5. El producto publicado aparece inmediatamente visible en el catálogo para que los clientes puedan agregarlo a su pedido.
+6. Si falta algún campo obligatorio o se ingresa un valor negativo, se muestra un mensaje de error y no se publica el producto. 

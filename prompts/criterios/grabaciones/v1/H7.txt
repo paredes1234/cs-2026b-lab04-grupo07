@@ -1,0 +1,6 @@
+Criterios de aceptación:
+
+1. Las pantallas principales de la aplicación cargan en menos de 2 segundos bajo una conexión móvil estándar.
+2. La interfaz cuenta con navegación intuitiva, botones visibles y etiquetas claras para que el comerciante publique o gestione productos en un máximo de 3 pasos.
+3. El diseño es responsivo y se adapta correctamente a pantallas de teléfonos móviles sin requerir desplazamiento horizontal.
+4. Los mensajes de error y confirmación son claros y comprensibles para usuarios sin experiencia técnica.

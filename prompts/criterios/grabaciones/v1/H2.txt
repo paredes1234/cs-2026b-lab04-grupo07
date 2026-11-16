@@ -1,0 +1,7 @@
+Criterios de aceptación:
+
+1. El cliente puede visualizar una lista o sección con los diferentes puestos disponibles en el mercado.
+2. Al seleccionar un puesto específico, el sistema muestra únicamente los productos pertenecientes a ese puesto.
+3. Cada producto listado muestra su nombre, precio y disponibilidad actual.
+4. Si un puesto aún no tiene productos publicados, se muestra un mensaje informativo indicando que no hay productos disponibles.
+5. El cliente puede regresar fácilmente a la vista general de puestos para explorar otros comercios.

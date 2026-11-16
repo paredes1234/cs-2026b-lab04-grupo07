@@ -1,0 +1,20 @@
+{
+  "historia_id": "H1",
+  "invest_ok": true,
+  "preguntas": [],
+  "escenarios": [
+    {
+      "titulo": "Publicación exitosa de producto en el puesto",
+      "tipo": "exito",
+      "dado": [
+        "que el comerciante del puesto 14 ha iniciado sesión en San Camilo en Línea",
+        "que se encuentra en el formulario de nuevo producto"
+      ],
+      "cuando": "ingresa el nombre \"Queso paria\", el precio \"18.50\" y la cantidad disponible \"12\" y presiona \"Publicar\"",
+      "entonces": [
+        "el sistema registra el producto en el catálogo de su puesto",
+        "los clientes pueden visualizar \"Queso paria\" a S/ 18.50 con 12 unidades disponibles"
+      ]
+    }
+  ]
+}

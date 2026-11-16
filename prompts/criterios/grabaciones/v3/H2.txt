@@ -1,0 +1,31 @@
+{
+  "historia_id": "H2",
+  "invest_ok": true,
+  "preguntas": [],
+  "escenarios": [
+    {
+      "titulo": "Consulta del catálogo filtrado por puesto",
+      "tipo": "exito",
+      "dado": [
+        "que el puesto \"Lácteos El Misti\" tiene publicados \"Queso fresco\" a S/ 16.00 y \"Yogurt natural\" a S/ 8.00",
+        "que existen otros puestos con productos distintos en el catálogo"
+      ],
+      "cuando": "el cliente selecciona el puesto \"Lácteos El Misti\"",
+      "entonces": [
+        "ve únicamente \"Queso fresco\" y \"Yogurt natural\" con sus precios y disponibilidad",
+        "no se muestran productos de otros puestos"
+      ]
+    },
+    {
+      "titulo": "Consulta de un puesto sin productos disponibles",
+      "tipo": "borde",
+      "dado": [
+        "que el puesto \"Frutas San Camilo\" no tiene productos publicados con disponibilidad"
+      ],
+      "cuando": "el cliente abre el catálogo de \"Frutas San Camilo\"",
+      "entonces": [
+        "ve el mensaje \"Este puesto no tiene productos disponibles por el momento\""
+      ]
+    }
+  ]
+}

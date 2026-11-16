@@ -1,0 +1,30 @@
+{
+  "historia_id": "H5",
+  "invest_ok": true,
+  "preguntas": [],
+  "escenarios": [
+    {
+      "titulo": "Aviso por WhatsApp al comerciante tras pago confirmado",
+      "tipo": "exito",
+      "dado": [
+        "que un cliente paga un pedido que incluye 3 kilos de cebolla y 1 kilo de zanahoria del puesto 11",
+        "que el comerciante del puesto 11 tiene un número de WhatsApp registrado"
+      ],
+      "cuando": "se confirma el pago del pedido",
+      "entonces": [
+        "el comerciante recibe un mensaje en WhatsApp con el código del pedido, los 3 kilos de cebolla y el kilo de zanahoria de su puesto"
+      ]
+    },
+    {
+      "titulo": "Pedido multipuesto envía solo los productos de cada puesto",
+      "tipo": "borde",
+      "dado": [
+        "que un cliente paga un pedido con productos del puesto 11 y del puesto 24"
+      ],
+      "cuando": "se envían los avisos por WhatsApp",
+      "entonces": [
+        "el comerciante del puesto 11 recibe únicamente el listado de productos correspondientes al puesto 11"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,32 @@
+{
+  "historia_id": "H1",
+  "invest_ok": true,
+  "preguntas": [],
+  "escenarios": [
+    {
+      "titulo": "Publicación exitosa de un producto",
+      "tipo": "exito",
+      "dado": [
+        "que el comerciante del puesto 22 está en la sección \"Mis productos\"",
+        "que completa el nombre \"Papa canchán\", el precio \"3.50\" y la cantidad disponible \"50\""
+      ],
+      "cuando": "confirma la publicación del producto",
+      "entonces": [
+        "el producto \"Papa canchán\" aparece publicado en su puesto con precio S/ 3.50 y 50 unidades disponibles",
+        "los clientes pueden verlo y agregarlo a su pedido"
+      ]
+    },
+    {
+      "titulo": "Error al publicar con campos obligatorios vacíos o precio inválido",
+      "tipo": "error",
+      "dado": [
+        "que el comerciante intenta registrar un producto dejando el precio vacío o ingresando cantidad \"0\""
+      ],
+      "cuando": "presiona el botón \"Publicar producto\"",
+      "entonces": [
+        "el producto no se publica en el catálogo",
+        "se muestra un mensaje indicando que debe ingresar nombre, precio mayor a cero y cantidad disponible válida"
+      ]
+    }
+  ]
+}

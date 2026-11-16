@@ -1,0 +1,10 @@
+{
+  "historia_id": "H7",
+  "invest_ok": false,
+  "preguntas": [
+    "¿Qué acción específica del comerciante necesita ser más rápida (por ejemplo, publicar un producto o revisar pedidos pagados)?",
+    "¿Cuál es el tiempo máximo de respuesta esperado o el criterio medible para considerar que la aplicación es rápida?",
+    "¿Qué dificultad concreta tienen actualmente los comerciantes al usar la aplicación que debemos simplificar?"
+  ],
+  "escenarios": []
+}

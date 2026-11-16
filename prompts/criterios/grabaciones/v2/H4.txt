@@ -1,0 +1,31 @@
+{
+  "historia_id": "H4",
+  "invest_ok": true,
+  "preguntas": [],
+  "escenarios": [
+    {
+      "titulo": "Selección de recojo en el mercado al confirmar",
+      "tipo": "exito",
+      "dado": [
+        "que el cliente tiene productos en su carrito y está en la pantalla de confirmación"
+      ],
+      "cuando": "selecciona la modalidad \"Recojo en el mercado\" y confirma el pedido",
+      "entonces": [
+        "el pedido se registra sin costo de envío",
+        "se muestra el horario y punto de recojo en el Mercado San Camilo"
+      ]
+    },
+    {
+      "titulo": "Intento de confirmar sin elegir modalidad de entrega",
+      "tipo": "borde",
+      "dado": [
+        "que el cliente se encuentra en la pantalla de confirmación del pedido sin haber marcado recojo ni delivery"
+      ],
+      "cuando": "presiona el botón \"Confirmar pedido\"",
+      "entonces": [
+        "el sistema impide confirmar el pedido",
+        "muestra el aviso \"Debe seleccionar recojo en el mercado o delivery\""
+      ]
+    }
+  ]
+}
