@@ -1,0 +1,5 @@
+{
+  "id": "B03",
+  "entrada": "cebolla roja",
+  "producto": "cebolla roja"
+}

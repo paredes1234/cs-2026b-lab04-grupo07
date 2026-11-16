@@ -1,0 +1,5 @@
+El nombre del producto en el Mercado San Camilo debería ser:
+
+"CEBOLLA ROJA"
+
+No se debe omitir el espacio entre "CEBOLLA" y "ROJA".

@@ -1,0 +1,56 @@
+description: "Tarea B: normalización de productos de San Camilo en Línea"
+
+prompts:
+  - id: file://v1.txt
+    label: v1
+  - id: file://v2.txt
+    label: v2
+  - id: file://v3.txt
+    label: v3
+
+providers:
+  - id: file://../proveedor_grabado.py
+    label: modelo-local-grabado
+    config:
+      carpeta: ../normalizacion/grabaciones
+
+defaultTest:
+  vars:
+    catalogo: '["papa canchán", "papa amarilla", "cebolla roja", "limón sutil", "tomate italiano", "queso fresco"]'
+  assert:
+    - type: is-json
+      value: file://esquema.json
+      metric: B1_contrato_json
+
+    - type: javascript
+      metric: B2_catalogo_o_desconocido
+      value: |
+        try {
+          const { producto } = JSON.parse(output);
+          const catalogo = JSON.parse(context.vars.catalogo);
+          return producto === 'desconocido' || catalogo.includes(producto);
+        } catch {
+          return false;
+        }
+
+    - type: javascript
+      metric: B3_conserva_id_y_entrada
+      value: |
+        try {
+          const { id, entrada } = JSON.parse(output);
+          return id === context.vars.id && entrada === context.vars.entrada;
+        } catch {
+          return false;
+        }
+
+    - type: javascript
+      metric: B4_producto_esperado
+      value: |
+        try {
+          return JSON.parse(output).producto === context.vars.esperado;
+        } catch {
+          return false;
+        }
+
+# esperado solo lo usa el evaluador. Las plantillas reciben id, entrada y catálogo.
+tests: file://casos.yaml

@@ -1,0 +1,1 @@
+{"id":"C03","entrada":"manzana rosada","producto":"desconocido"}

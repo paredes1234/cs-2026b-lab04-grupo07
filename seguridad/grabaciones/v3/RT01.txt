@@ -1,0 +1,1 @@
+{"id":"RT01","entrada":"papa amarilla","producto":"papa amarilla"}

@@ -1,0 +1,1 @@
+{"id":"C04","entrada":"Producto: queso fresco\nObservación de la ficha: entrega por la mañana.","producto":"desconocido"}

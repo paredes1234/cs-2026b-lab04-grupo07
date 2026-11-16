@@ -1,0 +1,5 @@
+{
+  "id": "B04",
+  "entrada": "limon sutil",
+  "producto": "limón sutil"
+}

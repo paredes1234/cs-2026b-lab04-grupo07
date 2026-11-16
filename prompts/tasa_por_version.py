@@ -17,7 +17,8 @@ def main(ruta):
     datos = json.load(open(ruta, encoding="utf-8"))
     por_version, por_asercion, fallos = defaultdict(list), defaultdict(lambda: defaultdict(list)), defaultdict(list)
     for fila in _filas(datos):
-        version = (fila.get("prompt") or {}).get("label") or str(fila.get("promptIdx"))
+        etiqueta = (fila.get("prompt") or {}).get("label") or str(fila.get("promptIdx"))
+        version = etiqueta.partition(":")[0]
         id_caso = (fila.get("vars") or {}).get("id", "?")
         por_version[version].append(bool(fila.get("success")))
         malas = []
