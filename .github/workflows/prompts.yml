@@ -1,0 +1,39 @@
+name: prompts
+# E7 (Lab 09): evalúa los prompts con promptfoo sobre las respuestas grabadas, sin clave de API.
+# promptfoo sale con código 100 si algún caso falla; v1 y v2 fallan a propósito (línea base),
+# así que la compuerta es verificar_tasas.py: la versión vigente debe aprobar el 85 % o más.
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+env:
+  PROMPTFOO_VERSION: "0.125.1"
+  PROMPTFOO_DISABLE_TELEMETRY: "1"
+  PROMPTFOO_DISABLE_UPDATE: "1"
+
+jobs:
+  evals:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: "22" }
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - run: pip install -r requirements-lab09.txt
+
+      - name: Tarea A (criterios de aceptación)
+        working-directory: prompts/criterios
+        run: npx --yes promptfoo@$PROMPTFOO_VERSION eval --no-table --no-cache -o "$RUNNER_TEMP/criterios.json" || [ $? -eq 100 ]
+      - name: Compuerta Tarea A (v3 >= 85 %)
+        run: python prompts/verificar_tasas.py "$RUNNER_TEMP/criterios.json" --version v3 --minimo 85
+
+      - name: Tarea B (normalización de productos)
+        working-directory: prompts/normalizacion
+        run: npx --yes promptfoo@$PROMPTFOO_VERSION eval --no-table --no-cache -o "$RUNNER_TEMP/normalizacion.json" || [ $? -eq 100 ]
+      - name: Compuerta Tarea B (v3 >= 85 %)
+        run: python prompts/verificar_tasas.py "$RUNNER_TEMP/normalizacion.json" --version v3 --minimo 85
+
+      - name: Red teaming (E5)
+        run: python seguridad/evaluar_red_team.py
