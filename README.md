@@ -265,3 +265,15 @@ python ../tasa_por_version.py /tmp/lab09-e4-resultados.json
 ```
 
 La primera orden finaliza con código 100 cuando hay casos desaprobados. El resumen general junta las tres versiones (16 de 30) y el script muestra la tasa por versión.
+
+### Integración del normalizador (E6)
+
+`GeneradorNormalizacion`, en `src/despues/generador_normalizacion.py`, implementa `ProveedorLLM` del Lab 07. Recibe un `ClienteLLMExterno` y un catálogo. Carga `v4` de E5 por defecto y permite seleccionar `v2` o `v3` de E4. El proveedor solo entrega `producto` después de comprobar el JSON Schema de E4, la coincidencia del ID y de `entrada` con los valores enviados, y la pertenencia al catálogo o el valor `desconocido`. Una respuesta inválida genera `SalidaInvalida`.
+
+Las pruebas usan un cliente grabado que lee archivos locales y captura el prompt recibido. Desde la raíz del repositorio:
+
+```bash
+python -m venv /tmp/lab09-e6-venv
+/tmp/lab09-e6-venv/bin/python -m pip install -r requirements-lab09.txt pytest
+/tmp/lab09-e6-venv/bin/python -m pytest -v tests/test_lab09_e6.py
+```

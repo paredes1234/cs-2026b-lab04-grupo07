@@ -10,7 +10,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with: { python-version: "3.12" }
-      - run: pip install import-linter pytest
+      - run: pip install import-linter pytest -r requirements-lab09.txt
       - name: Fitness functions estructurales (FF-01 a FF-03)
         run: lint-imports
       - name: Fitness functions de calidad (FF-04 a FF-07) y pruebas
