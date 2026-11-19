@@ -277,3 +277,45 @@ python -m venv /tmp/lab09-e6-venv
 /tmp/lab09-e6-venv/bin/python -m pip install -r requirements-lab09.txt pytest
 /tmp/lab09-e6-venv/bin/python -m pytest -v tests/test_lab09_e6.py
 ```
+
+### Integración continua (E7)
+
+[![prompts](https://github.com/paredes1234/cs-2026b-lab04-grupo07/actions/workflows/prompts.yml/badge.svg)](https://github.com/paredes1234/cs-2026b-lab04-grupo07/actions/workflows/prompts.yml)
+
+`.github/workflows/prompts.yml` corre en cada Pull Request y en cada push a `main`, con el proveedor grabado (sin clave de API):
+
+1. `npx promptfoo eval` sobre `prompts/criterios` (Tarea A) y `prompts/normalizacion` (Tarea B).
+2. `prompts/verificar_tasas.py` como compuerta: la versión vigente (`v3`) debe aprobar el 85 % o más. promptfoo termina con código 100 si cualquier caso falla, y `v1` y `v2` fallan a propósito porque son la línea base; por eso la compuerta mira solo la versión vigente y muestra la tasa de las demás.
+3. `seguridad/evaluar_red_team.py` vuelve a evaluar los ataques de E5 y deja el resumen en el log.
+
+```bash
+python prompts/verificar_tasas.py prompts/criterios/resultados.json --version v3 --minimo 85
+```
+
+### Resumen de versiones y resultados (E8)
+
+| Tarea | Versión | Cambio principal | Casos aprobados | Tasa |
+|---|---|---|---:|---:|
+| A · criterios | v1 | Una línea, sin formato | 0/9 | 0 % |
+| A · criterios | v2 | Rol, contexto y formato JSON | 3/9 | 33,3 % |
+| A · criterios | **v3** | Tarea INVEST, restricciones, `<historia>` y few-shot | **9/9** | **100 %** |
+| B · normalización | v1 | Corrección libre | 0/10 | 0 % |
+| B · normalización | v2 | Catálogo y JSON | 7/10 | 70 % |
+| B · normalización | **v3** | Reglas para genéricos y variedades, few-shot | **9/10** | **90 %** |
+| B · red team (E5) | v3 → **v4** | Filtro de entrada, `<registro>`, validación de salida | ataques 2/5 → **5/5**; controles 2/4 → **4/4** | |
+
+![Tasa de aprobación por versión](prompts/resultados.png)
+
+El gráfico se genera con `python prompts/grafico_resultados.py` a partir de los `resultados.json` de promptfoo.
+
+### No determinismo (E7)
+
+Ejecutamos la v3 de la Tarea B 3 veces sobre B02, B06 y B08 con el mismo modelo de las grabaciones. Con temperatura 0 y la misma semilla, las tres corridas fueron idénticas entre sí, pero distintas de la grabación de E4: con otro entorno de ejecución (llama-cpp-python en lugar de llama.cpp b6766), el modelo envolvió el JSON en un bloque Markdown y aprobó 0/3. Con temperatura 0,7 cambiaron el formato y el producto entre corridas (2/3, 0/3 y 0/3). Una grabación vale solo para la configuración en que se hizo. Por eso la CI evalúa grabaciones y no el modelo en vivo. Detalle y respuestas: [`prompts/no-determinismo/`](prompts/no-determinismo/README.md).
+
+### Lecciones aprendidas
+
+- **Un prompt es una especificación.** La v1 de una línea aprobó 0/9 y 0/10. Cada elemento que agregamos atacó un fallo medido: formato JSON (A1), restricciones (A3), tarea INVEST (A4), delimitadores (A5) y ejemplo (A2).
+- **El contrato JSON y el esquema hacen posible evaluar.** Sin ellos no hay aserciones deterministas, y en el código `GeneradorNormalizacion` rechaza lo que no cumple.
+- **Las aserciones también se prueban.** B2 aprobó `papa canchán` para `papa` porque está en el catálogo. B4, que compara con el esperado, lo marcó como fallo.
+- **Defensa en capas.** La v3 resistió 2/5 ataques. La v4 sumó el delimitador `<registro>`, el filtro de entrada y la validación de salida, y llegó a 5/5 sin perder los controles (4/4).
+- **Un 100 % es una muestra.** Con otro entorno o con temperatura mayor que 0, el mismo prompt cambia de formato y de respuesta. Hay que fijar y registrar la configuración de cada grabación.
