@@ -1,0 +1,32 @@
+{
+  "_nota": "Reglas ilustrativas del Lab 08 (supuestos de diseño, no reglas acordadas con los mercados).",
+  "mercados": [
+    {
+      "mercado_id": "SAN_CAMILO",
+      "nombre": "Mercado San Camilo",
+      "monto_minimo": 10,
+      "permite_delivery": true,
+      "costo_delivery": 5,
+      "hora_apertura": 6,
+      "hora_cierre": 18
+    },
+    {
+      "mercado_id": "ALTIPLANO",
+      "nombre": "Mercado Altiplano",
+      "monto_minimo": 0,
+      "permite_delivery": false,
+      "costo_delivery": 0,
+      "hora_apertura": 5,
+      "hora_cierre": 14
+    },
+    {
+      "mercado_id": "RIO_SECO",
+      "nombre": "Mercado Río Seco",
+      "monto_minimo": 15,
+      "permite_delivery": true,
+      "costo_delivery": 7,
+      "hora_apertura": 6,
+      "hora_cierre": 15
+    }
+  ]
+}
