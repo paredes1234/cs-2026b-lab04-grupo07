@@ -1,0 +1,101 @@
+[
+ {
+  "pensamiento": "Primero leo el issue para conocer lo observado, lo esperado y la prueba que lo reproduce.",
+  "accion": "leer_archivo",
+  "args": {
+   "ruta": "issues/ISSUE-03.md"
+  }
+ },
+ {
+  "pensamiento": "Antes de tocar el código reproduzco el fallo con las pruebas.",
+  "accion": "ejecutar_pruebas",
+  "args": {}
+ },
+ {
+  "pensamiento": "La prueba exige un Decimal y recibe el float 0.30000000000000004. En lugar de leer archivos completos, pido el mapa de firmas de src/despues, que es donde el issue ubica el problema.",
+  "accion": "mapa_repo",
+  "args": {
+   "carpeta": "src/despues"
+  }
+ },
+ {
+  "pensamiento": "El mapa muestra que el monto es float en servicio.confirmar_y_pagar (l. 95), en PuertoPago.procesar_pago y en AdaptadorPasarelaPago. PedidoPuesto no participa en el flujo de la prueba. Guardo la hipótesis antes de seguir.",
+  "accion": "anotar",
+  "args": {
+   "texto": "Hipótesis: confirmar_y_pagar (servicio.py:95) recibe monto float y lo pasa sin convertir a procesar_pago. Convertir a Decimal ahí. Ojo: PuertoPago y AdaptadorPasarelaPago declaran monto: float."
+  }
+ },
+ {
+  "pensamiento": "Busco solo las líneas que usan monto en servicio.py y los imports, en lugar de leer el archivo completo.",
+  "accion": "buscar",
+  "args": {
+   "patron": "monto|^import|^from"
+  }
+ },
+ {
+  "pensamiento": "La búsqueda fue demasiado amplia (recorrió todo el repositorio), pero ubica en servicio.py: import logging (l. 3), monto REAL (l. 84), la validación (l. 114), el envío a procesar_pago (l. 156) y los dos INSERT (l. 163 y 193). Agrego el import de Decimal.",
+  "accion": "editar_archivo",
+  "args": {
+   "ruta": "src/despues/servicio.py",
+   "antes": "import logging\n",
+   "despues": "import logging\nfrom decimal import Decimal, ROUND_HALF_UP\n"
+  }
+ },
+ {
+  "pensamiento": "Normalizo el monto a Decimal en céntimos justo antes de la validación (l. 114), que es única en servicio.py.",
+  "accion": "editar_archivo",
+  "args": {
+   "ruta": "src/despues/servicio.py",
+   "antes": "if cantidad <= 0 or monto <= 0:",
+   "despues": "monto = Decimal(str(monto)).quantize(Decimal(\"0.01\"), rounding=ROUND_HALF_UP)  # ISSUE-03\n        if cantidad <= 0 or monto <= 0:"
+  }
+ },
+ {
+  "pensamiento": "sqlite3 no acepta Decimal y REAL volvería a guardar un float: cambio la columna a TEXT.",
+  "accion": "editar_archivo",
+  "args": {
+   "ruta": "src/despues/servicio.py",
+   "antes": "monto REAL,",
+   "despues": "monto TEXT,"
+  }
+ },
+ {
+  "pensamiento": "Guardo el monto como texto exacto en el INSERT de PENDIENTE_VERIFICACION (l. 163).",
+  "accion": "editar_archivo",
+  "args": {
+   "ruta": "src/despues/servicio.py",
+   "antes": "(pedido_id, producto_id, cantidad, monto, \"PENDIENTE_VERIFICACION\", None)",
+   "despues": "(pedido_id, producto_id, cantidad, str(monto), \"PENDIENTE_VERIFICACION\", None)"
+  }
+ },
+ {
+  "pensamiento": "El INSERT de PAGADO tiene 'monto,' en una línea propia (l. 193), igual que la llamada a procesar_pago (l. 156). Incluyo la línea siguiente \"PAGADO\" para que el fragmento sea único; supongo 16 espacios de sangría.",
+  "accion": "editar_archivo",
+  "args": {
+   "ruta": "src/despues/servicio.py",
+   "antes": "monto,\n                \"PAGADO\",",
+   "despues": "str(monto),\n                \"PAGADO\","
+  }
+ },
+ {
+  "pensamiento": "Registro en la pizarra qué cambié, para el resumen final y para quien revise.",
+  "accion": "anotar",
+  "args": {
+   "texto": "Hecho: import Decimal; monto normalizado a 2 decimales antes de validar; columna monto TEXT; str(monto) en ambos INSERT. Pendiente: verificar con pruebas. PuertoPago sigue anotado como float."
+  }
+ },
+ {
+  "pensamiento": "Verifico con toda la suite: la prueba del issue 3 debe pasar y las demás no deben romperse.",
+  "accion": "ejecutar_pruebas",
+  "args": {}
+ },
+ {
+  "pensamiento": "Las pruebas confirman el cambio (49 de 50; solo falla el ISSUE-02, fuera de esta tarea). Leo mis notas para armar el resumen sin releer archivos.",
+  "accion": "leer_notas",
+  "args": {}
+ },
+ {
+  "pensamiento": "Las notas cubren hipótesis, cambios y el riesgo pendiente. Entrego el resumen.",
+  "final": "ISSUE-03 resuelto en src/despues/servicio.py: confirmar_y_pagar() normaliza el monto a Decimal con 2 decimales (ROUND_HALF_UP) antes de validarlo y de enviarlo a la estrategia de pago, y lo guarda como TEXT exacto en SQLite. Pruebas: 49 aprobadas; falla solo test_issue_02 (otro issue). No modifiqué las pruebas. Pendiente (anotado): PuertoPago y AdaptadorPasarelaPago siguen declarando monto: float."
+ }
+]
