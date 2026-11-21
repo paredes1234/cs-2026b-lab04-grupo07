@@ -1,0 +1,46 @@
+[
+ {
+  "pensamiento": "Primero leeré el archivo issues/ISSUE-01.md para comprender el problema observado, el comportamiento esperado y los archivos involucrados.",
+  "accion": "leer_archivo",
+  "args": {
+   "ruta": "issues/ISSUE-01.md"
+  }
+ },
+ {
+  "pensamiento": "El issue señala el método confirmar_y_pagar() en src/despues/servicio.py. Leeré ese archivo para analizar cómo se realizan los reintentos de pago.",
+  "accion": "leer_archivo",
+  "args": {
+   "ruta": "src/despues/servicio.py"
+  }
+ },
+ {
+  "pensamiento": "Leeré tests/test_issues_lab10.py para revisar cómo se reproduce el ISSUE-01 y asegurar que la corrección cumpla con la prueba sin modificarla.",
+  "accion": "leer_archivo",
+  "args": {
+   "ruta": "tests/test_issues_lab10.py"
+  }
+ },
+ {
+  "pensamiento": "Ya verifiqué el código y la prueba. Ahora editaré src/despues/servicio.py para garantizar idempotencia por pedido_id y evitar reintentos de cobro cuando ocurre un ConnectionError.",
+  "accion": "editar_archivo",
+  "args": {
+   "ruta": "src/despues/servicio.py",
+   "antes": "        # 3. Obtener la estrategia mediante Factory\n        estrategia_pago = self.fabrica_pagos.obtener(tipo_pago)\n\n        # 4. Procesar el pago con reintentos\n        intento = 0\n        transaccion_id = None\n\n        while intento < max_reintentos:\n            try:\n                transaccion_id = estrategia_pago.procesar_pago(\n                    monto,\n                    token_tarjeta\n                )\n                break\n\n            except ConnectionError as e:\n                intento += 1\n\n                if intento >= max_reintentos:\n                    self.inventario.liberar_stock(\n                        producto_id,\n                        cantidad\n                    )\n\n                    raise RuntimeError(\n                        f\"Error de red tras \"\n                        f\"{max_reintentos} reintentos: {str(e)}\"\n                    ) from e\n\n            except ValueError:\n                self.inventario.liberar_stock(\n                    producto_id,\n                    cantidad\n                )\n                raise",
+   "despues": "        # 3. Verificar idempotencia por pedido antes de cobrar\n        conn = self._get_connection()\n        fila_existente = conn.execute(\n            \"SELECT estado, transaccion_id FROM pedidos WHERE id = ?\",\n            (pedido_id,)\n        ).fetchone()\n        if not self.conn:\n            conn.close()\n\n        if fila_existente is not None:\n            estado_actual, tx_existente = fila_existente\n            if estado_actual == \"PAGADO\":\n                self.inventario.liberar_stock(producto_id, cantidad)\n                return {\n                    \"pedido_id\": pedido_id,\n                    \"estado\": \"PAGADO\",\n                    \"transaccion_id\": tx_existente\n                }\n            raise RuntimeError(\n                f\"El pedido {pedido_id} ya tiene un intento de cobro registrado ({estado_actual}).\"\n            )\n\n        # 4. Obtener la estrategia mediante Factory\n        estrategia_pago = self.fabrica_pagos.obtener(tipo_pago)\n\n        # 5. Procesar el pago de forma idempotente (sin reintentar tras ConnectionError)\n        try:\n            transaccion_id = estrategia_pago.procesar_pago(\n                monto,\n                token_tarjeta\n            )\n        except ConnectionError as e:\n            conn = self._get_connection()\n            conn.execute(\n                \"INSERT INTO pedidos VALUES (?, ?, ?, ?, ?, ?)\",\n                (pedido_id, producto_id, cantidad, monto, \"PENDIENTE_VERIFICACION\", None)\n            )\n            conn.commit()\n            if not self.conn:\n                conn.close()\n\n            self.inventario.liberar_stock(\n                producto_id,\n                cantidad\n            )\n            raise RuntimeError(\n                f\"Error de red al procesar el pago del pedido {pedido_id}; \"\n                f\"no se reintenta para evitar cobros duplicados: {str(e)}\"\n            ) from e\n        except ValueError:\n            self.inventario.liberar_stock(\n                producto_id,\n                cantidad\n            )\n            raise"
+  }
+ },
+ {
+  "pensamiento": "Ejecutaré la suite de pruebas para verificar el resultado tras modificar src/despues/servicio.py.",
+  "accion": "ejecutar_pruebas",
+  "args": {}
+ },
+ {
+  "pensamiento": "Revisaré el diff de los cambios realizados con ver_cambios antes de concluir la resolución del ISSUE-01.",
+  "accion": "ver_cambios",
+  "args": {}
+ },
+ {
+  "pensamiento": "La corrección de idempotencia en confirmar_y_pagar() ya está aplicada y revisada. Presento el resumen final.",
+  "final": "Se resolvió el ISSUE-01 en src/despues/servicio.py implementando verificación de idempotencia por pedido_id antes de cobrar y eliminando los reintentos automáticos ante un ConnectionError para evitar cobros duplicados."
+ }
+]

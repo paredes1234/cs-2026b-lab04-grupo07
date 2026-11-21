@@ -1,0 +1,27 @@
+@startuml
+title Máquina de estados del agente ReAct - San Camilo en Línea
+
+[*] --> DECIDIENDO
+
+DECIDIENDO --> VALIDANDO_CONTRATO : respuesta del modelo
+
+VALIDANDO_CONTRATO --> CONTRATO_INVALIDO : formato incorrecto
+CONTRATO_INVALIDO --> DECIDIENDO : solicitar nueva decisión
+
+VALIDANDO_CONTRATO --> EVALUANDO_POLITICA : decisión válida
+VALIDANDO_CONTRATO --> FINALIZADO : respuesta final
+
+EVALUANDO_POLITICA --> BLOQUEADO : acción no permitida
+BLOQUEADO --> DECIDIENDO : registrar observación
+
+EVALUANDO_POLITICA --> EJECUTANDO : acción permitida
+EJECUTANDO --> OBSERVANDO : resultado de herramienta
+
+OBSERVANDO --> DECIDIENDO : continuar análisis
+
+EVALUANDO_POLITICA --> LIMITE_ALCANZADO : máximo de pasos
+LIMITE_ALCANZADO --> [*]
+
+FINALIZADO --> [*]
+
+@enduml
