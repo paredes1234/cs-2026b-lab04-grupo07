@@ -1,0 +1,32 @@
+{
+ "ejecucion": "issue02_unico",
+ "issue": "issues/ISSUE-02.md",
+ "variante": "unico",
+ "rondas": 1,
+ "veredicto_revisor": null,
+ "aprobaciones_humanas": null,
+ "pruebas_finales": "1 failed, 49 passed in 1.18s",
+ "agentes": [
+  {
+   "agente": "ejecutor",
+   "pasos": 7,
+   "acciones": 6,
+   "rechazadas_por_contrato": 0,
+   "bloqueadas_por_politica": 0,
+   "herramientas": {
+    "leer_archivo": 2,
+    "ejecutar_pruebas": 2,
+    "buscar": 1,
+    "editar_archivo": 1
+   },
+   "contexto_final_caracteres": 7506,
+   "termino": "FINALIZADO"
+  }
+ ],
+ "total": {
+  "acciones": 6,
+  "rechazadas_por_contrato": 0,
+  "bloqueadas_por_politica": 0,
+  "contexto_final_caracteres": 7506
+ }
+}
