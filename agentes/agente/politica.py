@@ -1,6 +1,7 @@
 """Guardrails: qué puede hacer el agente, cuántas veces y con qué aprobación."""
 import re
 from dataclasses import dataclass, field
+from typing import Callable, Optional
 
 
 @dataclass
@@ -9,14 +10,21 @@ class Decision:
     motivo: str = ""
 
 
+# Herramientas de solo lectura (E4 agrega mapa_repo y leer_notas). Las usa el revisor (mínimo privilegio).
+SOLO_LECTURA = frozenset({"ver_cambios", "leer_archivo", "buscar", "ejecutar_pruebas", "mapa_repo", "leer_notas"})
+
+
 @dataclass
 class Politica:
     herramientas_permitidas: set = field(default_factory=lambda: {
-        "listar_archivos", "leer_archivo", "buscar", "ejecutar_pruebas", "editar_archivo", "ejecutar_comando"})
+        "listar_archivos", "leer_archivo", "buscar", "ejecutar_pruebas", "editar_archivo", "ejecutar_comando",
+        "mapa_repo", "anotar", "leer_notas"})
     comandos_permitidos: tuple = (r"^python -m pytest\b", r"^radon cc\b", r"^lint-imports\b", r"^git (status|diff)\b")
     rutas_protegidas: tuple = ("tests/",)          # el agente no puede "arreglar" las pruebas para que pasen
     max_pasos: int = 15
-    aprobar_edicion = None                          # función opcional: humano en el circuito (human-in-the-loop)
+    # E6: humano en el circuito. Recibe los args de la edición y devuelve True (aprobar) o False (rechazar).
+    # Antes era un atributo de clase sin anotación: no era un campo del dataclass y no se podía pasar al construir.
+    aprobar_edicion: Optional[Callable[[dict], bool]] = None
 
     def evaluar(self, accion: str, args: dict, paso: int) -> Decision:
         if paso > self.max_pasos:

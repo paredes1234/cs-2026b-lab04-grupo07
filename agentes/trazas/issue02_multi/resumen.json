@@ -1,0 +1,84 @@
+{
+ "ejecucion": "issue02_multi",
+ "issue": "issues/ISSUE-02.md",
+ "variante": "multi",
+ "rondas": 2,
+ "veredicto_revisor": "APROBADO. El ISSUE-02 queda resuelto: confirmar_y_pagar() libera el stock reservado si obtener() falla, si procesar_pago() lanza cualquier excepción y si el pedido ya tenía un intento de cobro registrado; no hay doble liberación. Pruebas: 49 de 50 (la falla es del ISSUE-03). Queda para el humano: (a) agregar pruebas para el intento previo y para una excepción distinta de ValueError en procesar_pago, y (b) aprobar y fusionar el PR.",
+ "aprobaciones_humanas": null,
+ "pruebas_finales": "1 failed, 49 passed in 1.38s",
+ "agentes": [
+  {
+   "agente": "planificador",
+   "pasos": 1,
+   "acciones": 0,
+   "rechazadas_por_contrato": 0,
+   "bloqueadas_por_politica": 0,
+   "herramientas": {},
+   "contexto_final_caracteres": 863,
+   "termino": "FINALIZADO"
+  },
+  {
+   "agente": "ejecutor",
+   "pasos": 7,
+   "acciones": 6,
+   "rechazadas_por_contrato": 0,
+   "bloqueadas_por_politica": 0,
+   "herramientas": {
+    "leer_archivo": 2,
+    "ejecutar_pruebas": 2,
+    "buscar": 1,
+    "editar_archivo": 1
+   },
+   "contexto_final_caracteres": 7860,
+   "termino": "FINALIZADO"
+  },
+  {
+   "agente": "revisor",
+   "pasos": 5,
+   "acciones": 4,
+   "rechazadas_por_contrato": 0,
+   "bloqueadas_por_politica": 0,
+   "herramientas": {
+    "ver_cambios": 1,
+    "leer_archivo": 2,
+    "ejecutar_pruebas": 1
+   },
+   "contexto_final_caracteres": 13290,
+   "termino": "FINALIZADO"
+  },
+  {
+   "agente": "ejecutor",
+   "pasos": 6,
+   "acciones": 5,
+   "rechazadas_por_contrato": 0,
+   "bloqueadas_por_politica": 0,
+   "herramientas": {
+    "anotar": 1,
+    "leer_archivo": 1,
+    "editar_archivo": 2,
+    "ejecutar_pruebas": 1
+   },
+   "contexto_final_caracteres": 14436,
+   "termino": "FINALIZADO"
+  },
+  {
+   "agente": "revisor",
+   "pasos": 3,
+   "acciones": 2,
+   "rechazadas_por_contrato": 0,
+   "bloqueadas_por_politica": 0,
+   "herramientas": {
+    "ver_cambios": 1,
+    "ejecutar_pruebas": 1
+   },
+   "contexto_final_caracteres": 3801,
+   "termino": "FINALIZADO"
+  }
+ ],
+ "total": {
+  "acciones": 17,
+  "rechazadas_por_contrato": 0,
+  "bloqueadas_por_politica": 0,
+  "contexto_final_caracteres": 40250
+ }
+}
