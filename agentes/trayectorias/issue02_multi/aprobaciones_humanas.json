@@ -1,0 +1,1 @@
+["s", "", "s", "", "s", "Aprobada con observación: except Exception es amplio; se acepta porque relanza el error y no hay doble liberación, pero antes de llevarlo a src/ faltan pruebas para un RuntimeError en procesar_pago y para el reintento de un pedido en PENDIENTE_VERIFICACION."]
