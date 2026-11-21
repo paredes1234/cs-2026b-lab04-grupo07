@@ -1,0 +1,2 @@
+- [1] Hipótesis: confirmar_y_pagar (servicio.py:95) recibe monto float y lo pasa sin convertir a procesar_pago. Convertir a Decimal ahí. Ojo: PuertoPago y AdaptadorPasarelaPago declaran monto: float.
+- [2] Hecho: import Decimal; monto normalizado a 2 decimales antes de validar; columna monto TEXT; str(monto) en ambos INSERT. Pendiente: verificar con pruebas. PuertoPago sigue anotado como float.

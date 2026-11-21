@@ -1,6 +1,7 @@
-
 __pycache__/
 *.py[cod]
 .pytest_cache/
 
 agentes/trabajo/
+# Lab 10: copias desechables del sandbox (las crea agentes/orquestador.py)
+agentes/ejecuciones/

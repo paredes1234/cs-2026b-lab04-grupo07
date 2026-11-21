@@ -27,13 +27,14 @@ def a_mermaid(eventos) -> str:
          "    participant EJ as Ejecutor (actor)", "    participant RV as Revisor (crítico)",
          "    participant P as Política", "    participant H as Herramientas"]
     ronda_actual = 1
+    hay_plan = any(e["agente"] == "planificador" for e in eventos)     # E5: el agente único no tiene planificador
     for e in eventos:
         a = alias[e["agente"]]
         if e["ronda"] != ronda_actual:
             ronda_actual = e["ronda"]
             l.append(f"    Note over EJ,RV: Ronda {ronda_actual} del bucle actor-crítico")
         if e["tipo"] == "objetivo":
-            origen = "U" if a == "PL" else ("PL" if a == "EJ" and e["ronda"] == 1 else ("RV" if a == "EJ" else "EJ"))
+            origen = "U" if a == "PL" or not hay_plan else ("PL" if a == "EJ" and e["ronda"] == 1 else ("RV" if a == "EJ" else "EJ"))
             l.append(f"    {origen}->>{a}: " + ("objetivo" if a == "PL" else "plan" if origen == "PL" else "cambios solicitados" if origen == "RV" else "resumen + diff"))
         elif e["tipo"] == "accion":
             if e["bloqueada"]:
@@ -41,8 +42,8 @@ def a_mermaid(eventos) -> str:
             else:
                 l += [f"    {a}->>H: {e['accion']}", f"    H-->>{a}: {resumir(e)}"]
         elif e["tipo"] == "final":
-            if a == "RV" and not e["texto"].startswith("CAMBIOS"):
-                l.append(f"    RV-->>U: {e['texto'].split('.')[0]}")
+            if (a == "RV" or not hay_plan) and not e["texto"].startswith("CAMBIOS"):
+                l.append(f"    {a}-->>U: {e['texto'].split('.')[0][:80]}")
     return "\n".join(l)
 
 def metricas(eventos) -> dict:
@@ -54,6 +55,8 @@ def metricas(eventos) -> dict:
     return {k: dict(v) for k, v in m.items()}
 
 if __name__ == "__main__":
-    ev = cargar()
-    pathlib.Path("trazas/trayectoria.mmd").write_text(a_mermaid(ev), encoding="utf-8")
+    import sys
+    carpeta = sys.argv[1] if len(sys.argv) > 1 else "trazas"       # E4-E6: python agente/traza.py trazas/<id>
+    ev = cargar(carpeta)
+    pathlib.Path(carpeta, "trayectoria.mmd").write_text(a_mermaid(ev), encoding="utf-8")
     print(json.dumps(metricas(ev), ensure_ascii=False, indent=1))

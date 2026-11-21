@@ -1,0 +1,36 @@
+sequenceDiagram
+    autonumber
+    actor U as Humano
+    participant PL as Planificador
+    participant EJ as Ejecutor (actor)
+    participant RV as Revisor (crítico)
+    participant P as Política
+    participant H as Herramientas
+    U->>EJ: resumen + diff
+    EJ->>H: leer_archivo
+    H-->>EJ: contenido de ISSUE-03.md
+    EJ->>H: ejecutar_pruebas
+    H-->>EJ: 2 failed, 48 passed in 1.28s
+    EJ->>H: mapa_repo
+    H-->>EJ:     11:   def __init__(self, interno: Su
+    EJ->>H: anotar
+    H-->>EJ: OK: nota 1 guardada en notas.md
+    EJ->>H: buscar
+    H-->>EJ: 13 coincidencia(s)
+    EJ->>H: editar_archivo
+    H-->>EJ: OK, archivo modificado
+    EJ->>H: editar_archivo
+    H-->>EJ: OK, archivo modificado
+    EJ->>H: editar_archivo
+    H-->>EJ: OK, archivo modificado
+    EJ->>H: editar_archivo
+    H-->>EJ: OK, archivo modificado
+    EJ->>H: editar_archivo
+    H-->>EJ: OK, archivo modificado
+    EJ->>H: anotar
+    H-->>EJ: OK: nota 2 guardada en notas.md
+    EJ->>H: ejecutar_pruebas
+    H-->>EJ: 1 failed, 49 passed in 1.31s
+    EJ->>H: leer_notas
+    H-->>EJ: - [2] Hecho: import Decimal, monto norma
+    EJ-->>U: ISSUE-03 resuelto en src/despues/servicio
