@@ -63,4 +63,5 @@ También notamos que el hallazgo salió de leer lo "Esperado" del issue. Un paso
 
 - Es una sola ejecución por variante y el mismo asistente de IA actuó como planificador, ejecutor y revisor. En un sistema real, el crítico debería usar otro prompt o, idealmente, otro modelo.
 - El revisor no puede agregar pruebas (`tests/` está protegido y su política es de solo lectura). Las pruebas para los dos hallazgos quedan como tarea humana; su veredicto lo dice explícitamente.
+- Las ejecuciones parten del commit `fa664fd` (E3), extraído con `git archive` por `agente/sandbox.py`.
 - Los números de contexto suman los historiales de cada agente. No incluyen el prompt de sistema porque `ModeloGrabado` no lo usa.
