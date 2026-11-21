@@ -1,4 +1,4 @@
-
+from decimal import Decimal, ROUND_HALF_UP
 import sqlite3
 import logging
 
@@ -56,6 +56,8 @@ class ServicioPedidosProcesadorRefactorizado:
             else PublicadorEventos()
         )
 
+        self._pedidos_procesados = set()
+
         # Inicializar la conexión a la base de datos
         self.conn = (
             sqlite3.connect(self.db_path)
@@ -110,8 +112,14 @@ class ServicioPedidosProcesadorRefactorizado:
         publica el evento pedido_pagado mediante Observer.
         """
 
-        # 1. Validar los datos del pedido
-        if cantidad <= 0 or monto <= 0:
+        # 1. Normalizar importe a Decimal exacto y validar datos del pedido
+        monto_decimal = (
+            monto
+            if isinstance(monto, Decimal)
+            else Decimal(str(monto))
+        ).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+
+        if cantidad <= 0 or monto_decimal <= Decimal("0.00"):
             raise ValueError(
                 "La cantidad y el monto deben ser mayores a cero."
             )
@@ -125,41 +133,47 @@ class ServicioPedidosProcesadorRefactorizado:
                 "Stock insuficiente para procesar el pedido."
             )
 
-        # 3. Obtener la estrategia mediante Factory
-        estrategia_pago = self.fabrica_pagos.obtener(tipo_pago)
+        # 3. Obtener la estrategia mediante Factory (liberar stock si falla)
+        try:
+            estrategia_pago = self.fabrica_pagos.obtener(tipo_pago)
+        except Exception:
+            self.inventario.liberar_stock(
+                producto_id,
+                cantidad
+            )
+            raise
 
-        # 4. Procesar el pago con reintentos
-        intento = 0
-        transaccion_id = None
+        # 4. Procesar el pago de forma idempotente (sin duplicar cobros tras timeout)
+        if pedido_id in self._pedidos_procesados:
+            self.inventario.liberar_stock(
+                producto_id,
+                cantidad
+            )
+            raise RuntimeError(
+                f"El pedido {pedido_id} ya fue procesado anteriormente."
+            )
 
-        while intento < max_reintentos:
-            try:
-                transaccion_id = estrategia_pago.procesar_pago(
-                    monto,
-                    token_tarjeta
-                )
-                break
+        try:
+            transaccion_id = estrategia_pago.procesar_pago(
+                monto_decimal,
+                token_tarjeta
+            )
+        except ConnectionError as e:
+            self.inventario.liberar_stock(
+                producto_id,
+                cantidad
+            )
+            raise RuntimeError(
+                f"Error de red al procesar el pago: {str(e)}"
+            ) from e
+        except Exception:
+            self.inventario.liberar_stock(
+                producto_id,
+                cantidad
+            )
+            raise
 
-            except ConnectionError as e:
-                intento += 1
-
-                if intento >= max_reintentos:
-                    self.inventario.liberar_stock(
-                        producto_id,
-                        cantidad
-                    )
-
-                    raise RuntimeError(
-                        f"Error de red tras "
-                        f"{max_reintentos} reintentos: {str(e)}"
-                    ) from e
-
-            except ValueError:
-                self.inventario.liberar_stock(
-                    producto_id,
-                    cantidad
-                )
-                raise
+        self._pedidos_procesados.add(pedido_id)
 
         # 5. Guardar el pedido pagado en SQLite
         conn = self._get_connection()
@@ -170,7 +184,7 @@ class ServicioPedidosProcesadorRefactorizado:
                 pedido_id,
                 producto_id,
                 cantidad,
-                monto,
+                float(monto_decimal),
                 "PAGADO",
                 transaccion_id
             )
