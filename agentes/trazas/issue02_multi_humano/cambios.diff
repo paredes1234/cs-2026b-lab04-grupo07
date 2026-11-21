@@ -1,0 +1,23 @@
+--- a/src/despues/servicio.py
++++ b/src/despues/servicio.py
+@@ -145,2 +145,4 @@
+                 }
++            # ISSUE-02 (revisor, ronda 1): este camino también debe devolver el stock reservado
++            self.inventario.liberar_stock(producto_id, cantidad)
+             raise RuntimeError(
+@@ -150,3 +152,8 @@
+         # 4. Obtener la estrategia mediante Factory
+-        estrategia_pago = self.fabrica_pagos.obtener(tipo_pago)
++        try:
++            estrategia_pago = self.fabrica_pagos.obtener(tipo_pago)
++        except ValueError:
++            # ISSUE-02: el tipo de pago no existe; se devuelve el stock reservado
++            self.inventario.liberar_stock(producto_id, cantidad)
++            raise
+ 
+@@ -176,3 +183,4 @@
+             ) from e
+-        except ValueError:
++        except Exception:
++            # ISSUE-02: si la estrategia no se puede ejecutar, el stock reservado vuelve a estar disponible
+             self.inventario.liberar_stock(
