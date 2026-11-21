@@ -1,0 +1,1 @@
+- [1] Pendiente r2: (1) servicio.py:146 RuntimeError por intento previo sin liberar stock. (2) procesar_pago: solo ConnectionError y ValueError liberan stock; cualquier otra excepción debe liberarlo. Sin tocar tests/.

@@ -1,0 +1,46 @@
+[
+ {
+  "pensamiento": "Primero leo el issue para conocer lo observado, lo esperado y la prueba que lo reproduce.",
+  "accion": "leer_archivo",
+  "args": {
+   "ruta": "issues/ISSUE-02.md"
+  }
+ },
+ {
+  "pensamiento": "Reproduzco el fallo con las pruebas antes de tocar el código.",
+  "accion": "ejecutar_pruebas",
+  "args": {}
+ },
+ {
+  "pensamiento": "La prueba del ISSUE-02 espera una liberación de stock que no ocurre. Localizo dónde se obtiene la estrategia de pago y dónde se reserva y libera stock.",
+  "accion": "buscar",
+  "args": {
+   "patron": "fabrica_pagos.obtener|def obtener|liberar_stock|reservar_stock"
+  }
+ },
+ {
+  "pensamiento": "El stock se reserva en servicio.py:120 y la estrategia se obtiene en la línea 151 sin protección: las liberaciones de las líneas 169 y 178 son de errores de procesar_pago. Leo factory.py para saber qué excepción lanza obtener() con un tipo no registrado.",
+  "accion": "leer_archivo",
+  "args": {
+   "ruta": "src/despues/factory.py"
+  }
+ },
+ {
+  "pensamiento": "obtener() lanza ValueError con un tipo no registrado, y esa llamada está fuera del try que libera stock. Envuelvo la obtención de la estrategia para liberar el stock reservado y relanzar el error.",
+  "accion": "editar_archivo",
+  "args": {
+   "ruta": "src/despues/servicio.py",
+   "antes": "estrategia_pago = self.fabrica_pagos.obtener(tipo_pago)",
+   "despues": "try:\n            estrategia_pago = self.fabrica_pagos.obtener(tipo_pago)\n        except ValueError:\n            # ISSUE-02: el tipo de pago no existe; se devuelve el stock reservado\n            self.inventario.liberar_stock(producto_id, cantidad)\n            raise"
+  }
+ },
+ {
+  "pensamiento": "Verifico con toda la suite.",
+  "accion": "ejecutar_pruebas",
+  "args": {}
+ },
+ {
+  "pensamiento": "La prueba del ISSUE-02 pasa; solo falla la del ISSUE-03, que no es parte de esta tarea. No modifiqué pruebas.",
+  "final": "ISSUE-02 resuelto en src/despues/servicio.py: si fabrica_pagos.obtener() lanza ValueError por un tipo de pago no registrado, confirmar_y_pagar() libera el stock reservado y relanza el error. Pruebas: 49 aprobadas; falla solo test_issue_03 (otro issue). No modifiqué las pruebas."
+ }
+]

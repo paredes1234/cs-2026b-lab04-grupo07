@@ -1,0 +1,12 @@
+--- a/src/despues/servicio.py
++++ b/src/despues/servicio.py
+@@ -150,3 +150,8 @@
+         # 4. Obtener la estrategia mediante Factory
+-        estrategia_pago = self.fabrica_pagos.obtener(tipo_pago)
++        try:
++            estrategia_pago = self.fabrica_pagos.obtener(tipo_pago)
++        except ValueError:
++            # ISSUE-02: el tipo de pago no existe; se devuelve el stock reservado
++            self.inventario.liberar_stock(producto_id, cantidad)
++            raise
+ 
