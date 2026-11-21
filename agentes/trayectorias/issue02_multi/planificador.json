@@ -1,0 +1,6 @@
+[
+ {
+  "pensamiento": "El issue tiene una prueba que lo reproduce y nombra servicio.py. Plan mínimo y verificable, con revisión independiente contra lo esperado.",
+  "final": "PLAN\n1. Leer ISSUE-02.md y reproducir el fallo con las pruebas.\n2. Localizar en confirmar_y_pagar() dónde se reserva el stock y qué pasos posteriores pueden fallar.\n3. Corregir para que el stock reservado se libere si no se puede obtener o ejecutar la estrategia de pago, sin tocar las pruebas.\n4. Verificar: prueba del issue en verde y el resto sin regresiones.\n5. Revisión independiente del diff contra lo ESPERADO del issue antes del Pull Request."
+ }
+]
