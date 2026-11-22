@@ -319,3 +319,46 @@ Ejecutamos la v3 de la Tarea B 3 veces sobre B02, B06 y B08 con el mismo modelo 
 - **Las aserciones también se prueban.** B2 aprobó `papa canchán` para `papa` porque está en el catálogo. B4, que compara con el esperado, lo marcó como fallo.
 - **Defensa en capas.** La v3 resistió 2/5 ataques. La v4 sumó el delimitador `<registro>`, el filtro de entrada y la validación de salida, y llegó a 5/5 sin perder los controles (4/4).
 - **Un 100 % es una muestra.** Con otro entorno o con temperatura mayor que 0, el mismo prompt cambia de formato y de respuesta. Hay que fijar y registrar la configuración de cada grabación.
+
+## Sistemas agénticos (Lab 10)
+
+En San Camilo en Línea se usó un agente **ReAct** para analizar errores en pedidos, pagos e inventario. El contrato valida la decisión y la política controla las herramientas y el presupuesto. El agente propone cambios sobre una copia desechable. Para cambios de mayor riesgo se incorpora un planificador y un revisor crítico. La aceptación de los cambios queda a cargo del equipo. [ADR-010](docs/architecture/adr/010-sistema-agentico.md)
+
+### Máquina de estados
+
+```mermaid
+stateDiagram-v2
+    [*] --> DECIDIENDO
+    DECIDIENDO --> VALIDANDO_CONTRATO : decisión del modelo
+    VALIDANDO_CONTRATO --> CONTRATO_INVALIDO : decisión inválida
+    CONTRATO_INVALIDO --> DECIDIENDO : solicitar otra decisión
+    VALIDANDO_CONTRATO --> FINALIZADO : respuesta final
+    VALIDANDO_CONTRATO --> EVALUANDO_POLITICA : acción válida
+    EVALUANDO_POLITICA --> EJECUTANDO : acción autorizada
+    EVALUANDO_POLITICA --> BLOQUEADO : política o revisión humana
+    EVALUANDO_POLITICA --> LIMITE_ALCANZADO : presupuesto agotado
+    BLOQUEADO --> DECIDIENDO : registrar bloqueo
+    EJECUTANDO --> OBSERVANDO : resultado de la herramienta
+    OBSERVANDO --> DECIDIENDO : continuar
+    FINALIZADO --> [*]
+    LIMITE_ALCANZADO --> [*]
+```
+
+Cuando se activa `--humano`, la consulta `s/n` para editar ocurre dentro de `EVALUANDO_POLITICA` después de los controles previos. [Fuente PlantUML de E3](agentes/diseno/estados.puml) · [Hoja de ruta de delegación](agentes/delegacion.md)
+
+### Trayectoria del ISSUE-02
+
+![Trayectoria del ISSUE-02 en dos rondas actor-crítico](agentes/trazas/issue02_multi/trayectoria-e7.png)
+
+En la primera ronda el revisor detectó dos caminos sin liberar el stock. En la segunda, revisó los cambios y aprobó la corrección del ISSUE-02. La verificación final registró 49 pruebas aprobadas y un fallo del ISSUE-03. [Trayectoria detallada](agentes/trazas/issue02_multi/trayectoria.mmd) · [Resumen de la ejecución](agentes/trazas/issue02_multi/resumen.json)
+
+### Métricas de observación (E7)
+
+| Issue y variante | Pasos | Rondas | Acciones | Herramientas ejecutadas (llamadas) | Decisiones rechazadas por el contrato | Acciones bloqueadas por política | Contexto final (caracteres) |
+|---|---:|---:|---:|---|---:|---:|---:|
+| ISSUE-01 · agente único (E2) | 7 | 1 | 6 | `leer_archivo` ×3, `editar_archivo` ×1, `ejecutar_pruebas` ×1 | 0 | 1 (`ver_cambios`) | Sin medición |
+| ISSUE-02 · agente único (E5) | 7 | 1 | 6 | `leer_archivo` ×2, `ejecutar_pruebas` ×2, `buscar` ×1, `editar_archivo` ×1 | 0 | 0 | 7 506 |
+| ISSUE-02 · actor-crítico (E5) | 22 | 2 | 17 | `leer_archivo` ×5, `ejecutar_pruebas` ×5, `editar_archivo` ×3, `ver_cambios` ×2, `buscar` ×1, `anotar` ×1 | 0 | 0 | 40 250 |
+| ISSUE-03 · agente único con mapa y notas (E4) | 14 | 1 | 13 | `leer_archivo` ×1, `ejecutar_pruebas` ×2, `mapa_repo` ×1, `anotar` ×2, `buscar` ×1, `editar_archivo` ×5, `leer_notas` ×1 | 0 | 0 | 26 645 |
+
+Para actor-crítico se sumaron los pasos y el contexto de cada agente. El contexto se expresa en caracteres del historial serializado. La traza de ISSUE-01 carece de esa medición y muestra que su verificación se interrumpió durante la colección de pytest. [Observación y fuentes](agentes/observacion.md) · [Bitácora de IA](agentes/bitacora-ia.md)
