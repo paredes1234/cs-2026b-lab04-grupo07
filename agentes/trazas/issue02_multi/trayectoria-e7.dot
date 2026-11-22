@@ -1,0 +1,43 @@
+digraph ISSUE02 {
+    graph [rankdir=TB, bgcolor="white", pad=0.34, nodesep=0.40, ranksep=0.55,
+           fontname="DejaVu Sans", fontsize=19, fontcolor="#17324d", labelloc=t,
+           label="ISSUE-02 · Liberación del stock reservado\nTrayectoria con actor y crítico"]
+    node [shape=box, style="rounded,filled", fontname="DejaVu Sans", fontsize=12,
+          color="#567592", fillcolor="#f0f5fa", fontcolor="#16314a", margin="0.23,0.15"]
+    edge [fontname="DejaVu Sans", fontsize=10, color="#57718b", fontcolor="#304963", arrowsize=0.72]
+
+    plan [label="Planificador\nIdentifica el objetivo y propone un plan\n1 paso · 0 acciones"]
+
+    subgraph cluster_r1 {
+        label="Ronda 1"
+        fontname="DejaVu Sans Bold"
+        fontsize=14
+        fontcolor="#17324d"
+        style="rounded,filled"
+        color="#c9d8e7"
+        fillcolor="#f8fafc"
+        actor1 [group=actor, label="Ejecutor\nLibera el stock si falla la obtención\nde la estrategia de pago\n7 pasos · 6 acciones"]
+        review1 [group=revisor, label="Revisor · cambios solicitados\nDetecta dos casos sin liberar stock\n5 pasos · 4 acciones", fillcolor="#fff3df", color="#b07b2b"]
+        {rank=same; actor1; review1}
+        actor1 -> review1 [group=revisor, label="diff y pruebas"]
+    }
+
+    subgraph cluster_r2 {
+        label="Ronda 2"
+        fontname="DejaVu Sans Bold"
+        fontsize=14
+        fontcolor="#17324d"
+        style="rounded,filled"
+        color="#c9d8e7"
+        fillcolor="#f8fafc"
+        actor2 [group=actor, label="Ejecutor\nCubre un intento previo y fallos\nal ejecutar la estrategia\n6 pasos · 5 acciones"]
+        review2 [group=revisor, label="Revisor · aprobado\nVuelve a revisar el cambio y las pruebas\n3 pasos · 2 acciones", fillcolor="#e7f5ec", color="#4d8161"]
+        {rank=same; actor2; review2}
+        actor2 -> review2 [group=revisor, label="diff y pruebas"]
+    }
+
+    resultado [label="Verificación final\n49 pruebas aprobadas · 1 fallo de ISSUE-03", fillcolor="#edf3f9"]
+    plan -> actor1
+    review1 -> actor2 [group=actor, label="2 hallazgos"]
+    review2 -> resultado
+}
